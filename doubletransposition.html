@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Double Transposition - Chiffrement par permutation</title>
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --accent: #ff3e9d;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .method-container {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-encrypt {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+        }
+
+        .btn-decrypt {
+            background: linear-gradient(to right, #ff512f, #dd2476);
+        }
+
+        .result {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .transformation-steps {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f0f0f0;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .step {
+            display: flex;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .step-position {
+            font-weight: bold;
+            margin-right: 1rem;
+            color: var(--primary);
+        }
+
+        .code-block {
+            background: #1e1e2d;
+            color: #e0e0e0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            overflow-x: auto;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            color: #aaa;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .explanation {
+            background: rgba(255, 62, 157, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--accent);
+        }
+
+        .example {
+            background: rgba(37, 117, 252, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .grid-container {
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--dark-color);
+            color: white;
+            margin-top: 3rem;
+        }
+
+        .transposition-grid {
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .transposition-grid th,
+        .transposition-grid td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            min-width: 30px;
+        }
+
+        .transposition-grid th {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .transposition-grid .highlight {
+            background-color: rgba(255, 62, 157, 0.1);
+        }
+
+        .key-sequence {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .key-number {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+        }
+
+        .key-number.active {
+            background: var(--accent);
+        }
+
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        nav {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        nav ul li a {
+            color: var(--dark-color);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            background: rgba(106, 17, 203, 0.05);
+            border-radius: 30px;
+            display: block;
+            text-align: center;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(106, 17, 203, 0.1);
+        }
+
+        nav ul li a:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
+        }
+
+
+
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .bigram-visual {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .grid-container {
+                max-width: 300px;
+            }
+        }
+
+        footer {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 3rem;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .social-links a:hover {
+            transform: translateY(-3px) scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animation subtile au survol */
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .social-links a:hover i {
+            animation: float 1.5s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            footer {
+                padding: 1.5rem 0.5rem;
+            }
+
+            .social-links {
+                gap: 1rem;
+            }
+
+            .social-links a {
+                font-size: 1.2rem;
+                width: 35px;
+                height: 35px;
+                line-height: 35px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Double Transposition</h1>
+        <div class="creator">Réalisé par Chemaa Sarra master 1 RSD Groupe 1</div>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="cesar.html"><i class="fas fa-rotate-right"></i> Chiffrement de César</a></li>
+            <li><a href="Vigenère.html"><i class="fas fa-keyboard"></i> Chiffrement de Vigenère</a></li>
+            <li><a href="polybe.html"><i class="fas fa-border-all"></i> Carré de Polybe</a></li>
+            <li><a href="substitution.html"><i class="fas fa-retweet"></i> Substitution simple</a></li>
+            <li><a href="trithemius.html"><i class="fas fa-sliders"></i> Trithemius</a></li>
+            <li><a href="doubletransposition.html"><i class="fas fa-layer-group"></i> Double transposition</a></li>
+            <li><a href="playfair.html"><i class="fas fa-table-cells"></i> Playfair</a></li>
+            <li><a href="atbash1.html"><i class="fas fa-arrows-left-right"></i> Atbash 1</a></li>
+            <li><a href="porta.html"><i class="fas fa-door-closed"></i> Porta</a></li>
+            <li><a href="atbash2.html"><i class="fas fa-arrows-turn-right"></i> Atbash 2</a></li>
+            <li><a href="autokey.html"><i class="fas fa-robot"></i> Autokey</a></li>
+            <li><a href="albert.html"><i class="fas fa-compact-disc"></i> d'Alberti</a></li>
+            <li><a href="rot13.html"><i class="fas fa-rotate"></i> ROT13</a></li>
+            <li><a href="Vernam.html"><i class="fas fa-user-secret"></i> Vernam OTP</a></li>
+            <li><a href="Beaufort.html"><i class="fas fa-wind"></i> Beaufort</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="method-container">
+            <div class="input-group">
+                <label for="message"><i class="fas fa-font"></i> Message :</label>
+                <textarea id="message" placeholder="Entrez votre texte ici..."></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="colKey"><i class="fas fa-key"></i> Clé colonnes (ex: 3412) :</label>
+                <input type="text" id="colKey" placeholder="Entrez la clé pour les colonnes...">
+            </div>
+
+            <div class="input-group">
+                <label for="rowKey"><i class="fas fa-key"></i> Clé lignes (ex: 231) :</label>
+                <input type="text" id="rowKey" placeholder="Entrez la clé pour les lignes...">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-encrypt" onclick="processDoubleTransposition('encrypt')">
+                    <i class="fas fa-lock"></i> Chiffrer
+                </button>
+                <button class="btn btn-decrypt" onclick="processDoubleTransposition('decrypt')">
+                    <i class="fas fa-lock-open"></i> Déchiffrer
+                </button>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-result"></i> Résultat :</label>
+                <div class="result" id="result"></div>
+                <div class="transformation-steps" id="steps"></div>
+            </div>
+
+            <div class="explanation">
+                <h3><i class="fas fa-info-circle"></i> Comment fonctionne la double transposition ?</h3>
+                <p>La méthode de double transposition est un chiffrement par permutation qui consiste à :</p>
+                <ol>
+                    <li>Réorganiser les lettres d'un texte selon une clé de transposition pour les colonnes</li>
+                    <li>Puis répéter l'opération avec une deuxième transposition (souvent sur les lignes)</li>
+                </ol>
+                <p>Elle ne change pas les lettres elles-mêmes, seulement leur position.</p>
+
+                <h4>Étapes du chiffrement :</h4>
+                <ol>
+                    <li>On choisit deux clés :
+                        <ul>
+                            <li>Clé pour les colonnes (ex : "3412")</li>
+                            <li>Clé pour les lignes (ex : "231")</li>
+                        </ul>
+                        Ces clés indiquent l'ordre de lecture des colonnes et des lignes.
+                    </li>
+                    <li>On écrit le message dans une grille</li>
+                    <li>Première transposition (colonnes) - on réécrit les colonnes dans l'ordre de la clé</li>
+                    <li>Deuxième transposition (lignes) - on réécrit les lignes dans l'ordre de la deuxième clé</li>
+                </ol>
+
+                <div class="example">
+                    <h4><i class="fas fa-lightbulb"></i> Exemple pratique :</h4>
+                    <p><strong>Message :</strong> "SECRETMESSAGE"</p>
+                    <p><strong>Clé colonnes :</strong> "3412"</p>
+                    <p><strong>Clé lignes :</strong> "231"</p>
+
+                    <div class="grid-container">
+                        <h5>Grille initiale (4 colonnes) :</h5>
+                        <table class="transposition-grid">
+                            <tr>
+                                <th>Col 1</th>
+                                <th>Col 2</th>
+                                <th>Col 3</th>
+                                <th>Col 4</th>
+                            </tr>
+                            <tr>
+                                <td>S</td>
+                                <td>E</td>
+                                <td>C</td>
+                                <td>R</td>
+                            </tr>
+                            <tr>
+                                <td>E</td>
+                                <td>T</td>
+                                <td>M</td>
+                                <td>E</td>
+                            </tr>
+                            <tr>
+                                <td>S</td>
+                                <td>S</td>
+                                <td>A</td>
+                                <td>G</td>
+                            </tr>
+                            <tr>
+                                <td>E</td>
+                                <td>X</td>
+                                <td>X</td>
+                                <td>X</td>
+                            </tr>
+                        </table>
+
+                        <h5>Après transposition des colonnes (ordre 3-4-1-2) :</h5>
+                        <table class="transposition-grid">
+                            <tr>
+                                <th class="highlight">Col 3</th>
+                                <th class="highlight">Col 4</th>
+                                <th class="highlight">Col 1</th>
+                                <th class="highlight">Col 2</th>
+                            </tr>
+                            <tr>
+                                <td>C</td>
+                                <td>R</td>
+                                <td>S</td>
+                                <td>E</td>
+                            </tr>
+                            <tr>
+                                <td>M</td>
+                                <td>E</td>
+                                <td>E</td>
+                                <td>T</td>
+                            </tr>
+                            <tr>
+                                <td>A</td>
+                                <td>G</td>
+                                <td>S</td>
+                                <td>S</td>
+                            </tr>
+                            <tr>
+                                <td>X</td>
+                                <td>X</td>
+                                <td>E</td>
+                                <td>X</td>
+                            </tr>
+                        </table>
+
+                        <h5>Après transposition des lignes (ordre 2-3-1) :</h5>
+                        <table class="transposition-grid">
+                            <tr>
+                                <td>M</td>
+                                <td>E</td>
+                                <td>E</td>
+                                <td>T</td>
+                            </tr>
+                            <tr>
+                                <td>A</td>
+                                <td>G</td>
+                                <td>S</td>
+                                <td>S</td>
+                            </tr>
+                            <tr>
+                                <td>C</td>
+                                <td>R</td>
+                                <td>S</td>
+                                <td>E</td>
+                            </tr>
+                            <tr>
+                                <td>X</td>
+                                <td>X</td>
+                                <td>E</td>
+                                <td>X</td>
+                            </tr>
+                        </table>
+
+                        <p><strong>Résultat final :</strong> "MEETAGSSCRSEXXEX"</p>
+                    </div>
+                </div>
+
+                <h4>Déchiffrement :</h4>
+                <p>Le processus est exactement l'inverse :</p>
+                <ol>
+                    <li>On utilise les mêmes clés</li>
+                    <li>On recrée la grille</li>
+                    <li>On remet les lignes puis les colonnes dans leur ordre original</li>
+                </ol>
+
+                <h4>Avantages :</h4>
+                <ul>
+                    <li>Plus sécurisé qu'une simple transposition</li>
+                    <li>Conserve la fréquence des lettres (difficile à analyser par analyse de fréquence)</li>
+                </ul>
+
+                <h4>Inconvénients :</h4>
+                <ul>
+                    <li>Nécessite deux clés sécurisées</li>
+                    <li>Peut nécessiter un remplissage (lettres supplémentaires)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="code-block">
+            <div class="code-header">
+                <span>Implémentation en C</span>
+                <button class="copy-btn" onclick="copyCode()">
+                    <i class="far fa-copy"></i> Copier
+                </button>
+            </div>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+#define MAX 100
+#define MAX_COL 10
+#define MAX_LIG 10
+
+// Remplissage avec 'X' si message trop court
+void remplir_grille(char grille[MAX_LIG][MAX_COL], char message[], int lignes, int colonnes) {
+    int k = 0;
+    for (int i = 0; i < lignes; i++) {
+        for (int j = 0; j < colonnes; j++) {
+            if (k < strlen(message))
+                grille[i][j] = toupper(message[k++]);
+            else
+                grille[i][j] = 'X'; // lettre de remplissage
+        }
+    }
+}
+
+// Affichage de la matrice
+void afficher_matrice(char grille[MAX_LIG][MAX_COL], int lignes, int colonnes, char* titre) {
+    printf("\n%s :\n", titre);
+    for (int i = 0; i < lignes; i++) {
+        for (int j = 0; j < colonnes; j++) {
+            printf("%c ", grille[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+// Transposition par colonnes
+void transposition_colonne(char grille[MAX_LIG][MAX_COL], char resultat[MAX_LIG][MAX_COL], 
+                         int colonnes[], int lignes_nb, int colonnes_nb) {
+    for (int j = 0; j < colonnes_nb; j++) {
+        int col_source = colonnes[j] - 1;
+        for (int i = 0; i < lignes_nb; i++) {
+            resultat[i][j] = grille[i][col_source];
+        }
+    }
+}
+
+// Transposition par lignes
+void transposition_ligne(char grille[MAX_LIG][MAX_COL], char resultat[MAX_LIG][MAX_COL], 
+                       int lignes[], int lignes_nb, int colonnes_nb) {
+    for (int i = 0; i < lignes_nb; i++) {
+        int ligne_source = lignes[i] - 1;
+        for (int j = 0; j < colonnes_nb; j++) {
+            resultat[i][j] = grille[ligne_source][j];
+        }
+    }
+}
+
+// Lire clé sous forme "3412" → convertir en tableau {3,4,1,2}
+void lire_cle(char texte[], int cle[], int taille) {
+    for (int i = 0; i < taille; i++) {
+        cle[i] = texte[i] - '0';
+    }
+}
+
+int main() {
+    char message[MAX];
+    char cle_col_text[MAX], cle_lig_text[MAX];
+    int cle_col[MAX_COL], cle_lig[MAX_LIG];
+    int nb_colonnes, nb_lignes;
+
+    printf("=== Chiffrement par double transposition ===\n");
+    printf("Message à chiffrer (sans espaces) : ");
+    scanf("%s", message);
+
+    printf("Clé colonne (ex : 3412) : ");
+    scanf("%s", cle_col_text);
+    nb_colonnes = strlen(cle_col_text);
+    lire_cle(cle_col_text, cle_col, nb_colonnes);
+
+    printf("Clé ligne (ex : 231) : ");
+    scanf("%s", cle_lig_text);
+    nb_lignes = strlen(cle_lig_text);
+    lire_cle(cle_lig_text, cle_lig, nb_lignes);
+
+    // Grilles
+    char grille_init[MAX_LIG][MAX_COL];
+    char grille_col[MAX_LIG][MAX_COL];
+    char grille_final[MAX_LIG][MAX_COL];
+
+    // Remplir la grille
+    remplir_grille(grille_init, message, nb_lignes, nb_colonnes);
+    afficher_matrice(grille_init, nb_lignes, nb_colonnes, "Grille initiale");
+
+    // 1ère transposition (colonnes)
+    transposition_colonne(grille_init, grille_col, cle_col, nb_lignes, nb_colonnes);
+    afficher_matrice(grille_col, nb_lignes, nb_colonnes, "Après transposition des colonnes");
+
+    // 2ème transposition (lignes)
+    transposition_ligne(grille_col, grille_final, cle_lig, nb_lignes, nb_colonnes);
+    afficher_matrice(grille_final, nb_lignes, nb_colonnes, "Après transposition des lignes");
+
+    // Affichage du texte final
+    printf("\nMessage chiffré : ");
+    for (int i = 0; i < nb_lignes; i++)
+        for (int j = 0; j < nb_colonnes; j++)
+            printf("%c", grille_final[i][j]);
+
+    printf("\n");
+    return 0;
+}</code></pre>
+        </div>
+    </div>
+
+    <footer>
+        <p>Projet réalisé dans le cadre du module de cryptographie (option) encadree par Dr Bourmel</p>
+        <p>&copy; 2025 Chemaa Sarra </p>
+        <div class="social-links">
+            <a href="#"><i class="fab fa-github"></i></a>
+            <a href="#"><i class="fab fa-linkedin"></i></a>
+            <a href="#"><i class="fas fa-envelope"></i></a>
+        </div>
+    </footer>
+
+    <script>
+        // Convertir une clé texte en tableau numérique
+        function parseKey(keyText) {
+            return keyText.split('').map(c => parseInt(c));
+        }
+
+        // Valider une clé (doit contenir tous les nombres de 1 à n)
+        function validateKey(key, size) {
+            if (key.length !== size) return false;
+
+            const sorted = [...key].sort((a, b) => a - b);
+            for (let i = 0; i < size; i++) {
+                if (sorted[i] !== i + 1) return false;
+            }
+
+            return true;
+        }
+
+        // Créer une grille à partir du message
+        function createGrid(message, cols) {
+            const rows = Math.ceil(message.length / cols);
+            const grid = [];
+
+            let index = 0;
+            for (let i = 0; i < rows; i++) {
+                const row = [];
+                for (let j = 0; j < cols; j++) {
+                    if (index < message.length) {
+                        row.push(message.charAt(index++).toUpperCase());
+                    } else {
+                        row.push('X'); // Remplissage
+                    }
+                }
+                grid.push(row);
+            }
+
+            return grid;
+        }
+
+        // Transposer une grille selon une clé
+        function transposeGrid(grid, key, isColumnTransposition) {
+            const result = [];
+            const size = isColumnTransposition ? grid[0].length : grid.length;
+
+            if (!validateKey(key, size)) {
+                alert(`Clé ${isColumnTransposition ? 'colonnes' : 'lignes'} invalide! Doit contenir tous les nombres de 1 à ${size}`);
+                return null;
+            }
+
+            if (isColumnTransposition) {
+                // Transposition des colonnes
+                for (let i = 0; i < grid.length; i++) {
+                    const newRow = [];
+                    for (let j = 0; j < key.length; j++) {
+                        newRow.push(grid[i][key[j] - 1]);
+                    }
+                    result.push(newRow);
+                }
+            } else {
+                // Transposition des lignes
+                for (let i = 0; i < key.length; i++) {
+                    result.push([...grid[key[i] - 1]]);
+                }
+            }
+
+            return result;
+        }
+
+        // Afficher une grille HTML
+        function displayGridHTML(grid, title, stepElement) {
+            const table = document.createElement('table');
+            table.className = 'transposition-grid';
+
+            const caption = document.createElement('caption');
+            caption.textContent = title;
+            caption.style.textAlign = 'left';
+            caption.style.margin = '10px 0';
+            caption.style.fontWeight = 'bold';
+            table.appendChild(caption);
+
+            // En-têtes pour les colonnes
+            if (grid.length > 0) {
+                const headerRow = document.createElement('tr');
+                for (let j = 0; j < grid[0].length; j++) {
+                    const th = document.createElement('th');
+                    th.textContent = `Col ${j + 1}`;
+                    headerRow.appendChild(th);
+                }
+                table.appendChild(headerRow);
+            }
+
+            // Lignes de données
+            for (let i = 0; i < grid.length; i++) {
+                const row = document.createElement('tr');
+                for (let j = 0; j < grid[i].length; j++) {
+                    const td = document.createElement('td');
+                    td.textContent = grid[i][j];
+                    row.appendChild(td);
+                }
+                table.appendChild(row);
+            }
+
+            stepElement.appendChild(table);
+        }
+
+        // Traitement de la double transposition
+        function processDoubleTransposition(operation) {
+            const message = document.getElementById('message').value.replace(/\s/g, '').toUpperCase();
+            const colKeyText = document.getElementById('colKey').value;
+            const rowKeyText = document.getElementById('rowKey').value;
+            const resultElement = document.getElementById('result');
+            const stepsElement = document.getElementById('steps');
+
+            stepsElement.innerHTML = '';
+            resultElement.textContent = '';
+
+            if (!message || !colKeyText || !rowKeyText) {
+                resultElement.textContent = "Veuillez entrer un message et des clés valides";
+                return;
+            }
+
+            const colKey = parseKey(colKeyText);
+            const rowKey = parseKey(rowKeyText);
+            const cols = colKey.length;
+            const rows = rowKey.length;
+
+            // Créer la grille initiale
+            const initialGrid = createGrid(message, cols);
+            displayGridHTML(initialGrid, "Grille initiale:", stepsElement);
+
+            // Première transposition (colonnes)
+            const afterColTransposition = transposeGrid(initialGrid, colKey, true);
+            if (!afterColTransposition) return;
+
+            displayGridHTML(afterColTransposition, "Après transposition des colonnes:", stepsElement);
+
+            // Deuxième transposition (lignes)
+            const finalGrid = transposeGrid(afterColTransposition, rowKey, false);
+            if (!finalGrid) return;
+
+            displayGridHTML(finalGrid, "Après transposition des lignes:", stepsElement);
+
+            // Construire le résultat final
+            let result = '';
+            for (let i = 0; i < finalGrid.length; i++) {
+                for (let j = 0; j < finalGrid[i].length; j++) {
+                    result += finalGrid[i][j];
+                }
+            }
+
+            const operationText = operation === 'encrypt' ? 'chiffré' : 'déchiffré';
+            resultElement.innerHTML = `<strong>Texte ${operationText} :</strong> ${result}`;
+        }
+
+        // Copier le code C
+        function copyCode() {
+            const code = document.querySelector('.code-block code').innerText;
+            navigator.clipboard.writeText(code)
+                .then(() => {
+                    const btn = document.querySelector('.copy-btn');
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="far fa-copy"></i> Copier';
+                    }, 2000);
+                });
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            // Exemple pré-rempli pour démonstration
+            document.getElementById('message').value = 'SECRETMESSAGE';
+            document.getElementById('colKey').value = '3412';
+            document.getElementById('rowKey').value = '231';
+        });
+    </script>
+
+
+</body>
+
+</html>

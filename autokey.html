@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autokey - Projet Cryptographie</title>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --accent: #ff3e9d;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .method-container {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-encrypt {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+        }
+
+        .btn-decrypt {
+            background: linear-gradient(to right, #ff512f, #dd2476);
+        }
+
+        .result {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .process-details {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f0f0f0;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .detail-position {
+            font-weight: bold;
+            margin-right: 1rem;
+            color: var(--primary);
+        }
+
+        .code-block {
+            background: #1e1e2d;
+            color: #e0e0e0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            overflow-x: auto;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            color: #aaa;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .explanation {
+            background: rgba(255, 62, 157, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--accent);
+        }
+
+        .example {
+            background: rgba(37, 117, 252, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .key-visualization {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .key-part {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            margin: 0.2rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .initial-key {
+            background: var(--primary);
+            color: white;
+        }
+
+        .message-key {
+            background: var(--secondary);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        nav {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        nav ul li a {
+            color: var(--dark-color);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            background: rgba(106, 17, 203, 0.05);
+            border-radius: 30px;
+            display: block;
+            text-align: center;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(106, 17, 203, 0.1);
+        }
+
+        nav ul li a:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
+        }
+
+
+
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .bigram-visual {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .grid-container {
+                max-width: 300px;
+            }
+        }
+
+        footer {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 3rem;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .social-links a:hover {
+            transform: translateY(-3px) scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animation subtile au survol */
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .social-links a:hover i {
+            animation: float 1.5s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            footer {
+                padding: 1.5rem 0.5rem;
+            }
+
+            .social-links {
+                gap: 1rem;
+            }
+
+            .social-links a {
+                font-size: 1.2rem;
+                width: 35px;
+                height: 35px;
+                line-height: 35px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Chiffrement Autokey</h1>
+        <div class="creator">Réalisé par Chemaa Sarra master 1 RSD Groupe 1</div>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="cesar.html"><i class="fas fa-rotate-right"></i> Chiffrement de César</a></li>
+            <li><a href="Vigenère.html"><i class="fas fa-keyboard"></i> Chiffrement de Vigenère</a></li>
+            <li><a href="polybe.html"><i class="fas fa-border-all"></i> Carré de Polybe</a></li>
+            <li><a href="substitution.html"><i class="fas fa-retweet"></i> Substitution simple</a></li>
+            <li><a href="trithemius.html"><i class="fas fa-sliders"></i> Trithemius</a></li>
+            <li><a href="doubletransposition.html"><i class="fas fa-layer-group"></i> Double transposition</a></li>
+            <li><a href="playfair.html"><i class="fas fa-table-cells"></i> Playfair</a></li>
+            <li><a href="atbash1.html"><i class="fas fa-arrows-left-right"></i> Atbash 1</a></li>
+            <li><a href="porta.html"><i class="fas fa-door-closed"></i> Porta</a></li>
+            <li><a href="atbash2.html"><i class="fas fa-arrows-turn-right"></i> Atbash 2</a></li>
+            <li><a href="autokey.html"><i class="fas fa-robot"></i> Autokey</a></li>
+            <li><a href="albert.html"><i class="fas fa-compact-disc"></i> d'Alberti</a></li>
+            <li><a href="rot13.html"><i class="fas fa-rotate"></i> ROT13</a></li>
+            <li><a href="Vernam.html"><i class="fas fa-user-secret"></i> Vernam OTP</a></li>
+            <li><a href="Beaufort.html"><i class="fas fa-wind"></i> Beaufort</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="method-container">
+            <div class="input-group">
+                <label for="message"><i class="fas fa-font"></i> Message (lettres seulement) :</label>
+                <textarea id="message"
+                    placeholder="Entrez votre texte ici (sans espaces ni caractères spéciaux)..."></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="key"><i class="fas fa-key"></i> Clé initiale :</label>
+                <input type="text" id="key" placeholder="Entrez votre clé initiale...">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-encrypt" onclick="processAutokey('encrypt')">
+                    <i class="fas fa-lock"></i> Chiffrer
+                </button>
+                <button class="btn btn-decrypt" onclick="processAutokey('decrypt')">
+                    <i class="fas fa-lock-open"></i> Déchiffrer
+                </button>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-result"></i> Résultat :</label>
+                <div class="result" id="result"></div>
+                <div class="process-details" id="details"></div>
+            </div>
+
+            <div class="explanation">
+                <h3><i class="fas fa-info-circle"></i> Comment fonctionne le chiffrement Autokey ?</h3>
+                <p>L'Autokey est une variante améliorée du chiffrement Vigenère :</p>
+                <ul>
+                    <li>On commence avec une <strong>clé initiale</strong> courte</li>
+                    <li>La clé est complétée <strong>automatiquement</strong> par le message lui-même</li>
+                    <li>Plus sécurisé que Vigenère car la clé n'est pas répétitive</li>
+                </ul>
+
+                <div class="example">
+                    <h4><i class="fas fa-lightbulb"></i> Exemple pratique :</h4>
+                    <p><strong>Message :</strong> "MESSAGE"</p>
+                    <p><strong>Clé initiale :</strong> "KEY"</p>
+                    <p><strong>Clé complète :</strong> "KEYMESS" (clé + début du message)</p>
+
+                    <div class="key-visualization">
+                        <span class="key-part initial-key">KEY</span>
+                        <span class="key-part message-key">M</span>
+                        <span class="key-part message-key">E</span>
+                        <span class="key-part message-key">S</span>
+                        <span class="key-part message-key">S</span>
+                    </div>
+
+                    <p><strong>Chiffrement :</strong></p>
+                    <ol>
+                        <li>M (12) + K (10) = 22 → W</li>
+                        <li>E (4) + E (4) = 8 → I</li>
+                        <li>S (18) + Y (24) = 42 → 16 → Q (mod 26)</li>
+                        <li>...</li>
+                    </ol>
+                    <p><strong>Résultat :</strong> "WIQ..."</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="code-block">
+            <div class="code-header">
+                <span>Implémentation en C</span>
+                <button class="copy-btn" onclick="copyCode()">
+                    <i class="far fa-copy"></i> Copier
+                </button>
+            </div>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+void chiffrerAutokey(char *message, char *cleInitiale, char *resultat) {
+    int len_msg = strlen(message);
+    int len_cle = strlen(cleInitiale);
+    
+    // Construire la clé complète
+    char cleComplete[100];
+    strcpy(cleComplete, cleInitiale);
+    strncat(cleComplete, message, len_msg - len_cle);
+    
+    // Chiffrement Vigenère avec clé étendue
+    for (int i = 0; i < len_msg; i++) {
+        resultat[i] = 'A' + (toupper(message[i]) - 'A' + toupper(cleComplete[i]) - 'A') % 26;
+    }
+    resultat[len_msg] = '\0';
+}
+
+void dechiffrerAutokey(char *texteChiffre, char *cleInitiale, char *resultat) {
+    int len = strlen(texteChiffre);
+    int len_cle = strlen(cleInitiale);
+    
+    // Déchiffrement progressif
+    for (int i = 0; i < len; i++) {
+        if (i < len_cle) {
+            // Utiliser la clé initiale
+            resultat[i] = 'A' + (toupper(texteChiffre[i]) - 'A' - (toupper(cleInitiale[i]) - 'A') + 26) % 26;
+        } else {
+            // Utiliser le message déchiffré précédent
+            resultat[i] = 'A' + (toupper(texteChiffre[i]) - 'A' - (resultat[i - len_cle] - 'A') + 26) % 26;
+        }
+    }
+    resultat[len] = '\0';
+}</code></pre>
+        </div>
+    </div>
+
+    <script>
+        // Chiffrement/Déchiffrement Autokey
+        function processAutokey(operation) {
+            const message = document.getElementById('message').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const key = document.getElementById('key').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const resultElement = document.getElementById('result');
+            const detailsElement = document.getElementById('details');
+
+            if (!message) {
+                resultElement.textContent = "Veuillez entrer un message valide (lettres seulement)";
+                return;
+            }
+
+            if (!key) {
+                resultElement.textContent = "Veuillez entrer une clé initiale";
+                return;
+            }
+
+            let result = "";
+            let fullKey = key;
+            let detailsHtml = "<h4>Détail du processus :</h4>";
+
+            if (operation === 'encrypt') {
+                // Construire la clé complète
+                fullKey += message.substring(0, message.length - key.length);
+
+                detailsHtml += `<p><strong>Clé complète :</strong> `;
+                for (let i = 0; i < fullKey.length; i++) {
+                    if (i < key.length) {
+                        detailsHtml += `<span class="key-part initial-key">${fullKey[i]}</span>`;
+                    } else {
+                        detailsHtml += `<span class="key-part message-key">${fullKey[i]}</span>`;
+                    }
+                }
+                detailsHtml += `</p><div class="detail-row"><div>Position</div><div>Message</div><div>Clé</div><div>Calcul</div><div>Résultat</div></div>`;
+
+                // Chiffrement
+                for (let i = 0; i < message.length; i++) {
+                    const msgCode = message.charCodeAt(i) - 65;
+                    const keyCode = fullKey.charCodeAt(i) - 65;
+                    const resCode = (msgCode + keyCode) % 26;
+                    const resChar = String.fromCharCode(resCode + 65);
+                    result += resChar;
+
+                    detailsHtml += `
+                    <div class="detail-row">
+                        <div class="detail-position">${i + 1}</div>
+                        <div>${message[i]} (${msgCode})</div>
+                        <div>${fullKey[i]} (${keyCode})</div>
+                        <div>(${msgCode} + ${keyCode}) mod 26 = ${resCode}</div>
+                        <div>${resChar}</div>
+                    </div>
+                `;
+                }
+            } else {
+                // Déchiffrement
+                detailsHtml += `<div class="detail-row"><div>Position</div><div>Chiffré</div><div>Clé</div><div>Calcul</div><div>Résultat</div></div>`;
+
+                for (let i = 0; i < message.length; i++) {
+                    let keyChar;
+                    if (i < key.length) {
+                        keyChar = key[i];
+                    } else {
+                        keyChar = result[i - key.length];
+                    }
+
+                    const msgCode = message.charCodeAt(i) - 65;
+                    const keyCode = keyChar.charCodeAt(0) - 65;
+                    const resCode = (msgCode - keyCode + 26) % 26;
+                    const resChar = String.fromCharCode(resCode + 65);
+                    result += resChar;
+
+                    detailsHtml += `
+                    <div class="detail-row">
+                        <div class="detail-position">${i + 1}</div>
+                        <div>${message[i]} (${msgCode})</div>
+                        <div>${keyChar} (${keyCode})</div>
+                        <div>(${msgCode} - ${keyCode} + 26) mod 26 = ${resCode}</div>
+                        <div>${resChar}</div>
+                    </div>
+                `;
+                }
+
+                // Reconstituer la clé complète pour l'affichage
+                fullKey = key + result.substring(0, message.length - key.length);
+            }
+
+            const operationText = operation === 'encrypt' ? 'chiffré' : 'déchiffré';
+            resultElement.innerHTML = `
+            <strong>Texte ${operationText} :</strong> ${result}
+            <div style="margin-top:10px;"><strong>Clé utilisée :</strong> ${fullKey}</div>
+        `;
+
+            detailsElement.innerHTML = detailsHtml;
+        }
+
+        // Copier le code C
+        function copyCode() {
+            const code = document.querySelector('.code-block code').innerText;
+            navigator.clipboard.writeText(code)
+                .then(() => {
+                    const btn = document.querySelector('.copy-btn');
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="far fa-copy"></i> Copier';
+                    }, 2000);
+                });
+        }
+    </script>
+
+    <footer>
+        <p>Projet réalisé dans le cadre du module de cryptographie (option) encadré par Dr. Bourmel</p>
+        <p>&copy; 2025 Chemaa Sarra - Tous droits réservés</p>
+        <div class="social-links">
+            <a href="https://github.com/sarrachemaa" target="_blank" aria-label="GitHub"><i
+                    class="fab fa-github"></i></a>
+            <a href="https://dz.linkedin.com/in/sarra-chemaa-0757502a3" target="_blank" aria-label="LinkedIn"><i
+                    class="fab fa-linkedin-in"></i></a>
+            <a href="sarrachemaa@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+    </footer>
+</body>
+
+</html>

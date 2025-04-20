@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vernam (OTP) - Projet Cryptographie</title>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --accent: #ff3e9d;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .method-container {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-encrypt {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+        }
+
+        .btn-decrypt {
+            background: linear-gradient(to right, #ff512f, #dd2476);
+        }
+
+        .btn-generate {
+            background: linear-gradient(to right, #8e2de2, #4a00e0);
+        }
+
+        .result {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .binary-result {
+            font-family: monospace;
+            word-break: break-all;
+            background: #f0f0f0;
+            padding: 0.3rem;
+            border-radius: 4px;
+        }
+
+        .code-block {
+            background: #1e1e2d;
+            color: #e0e0e0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            overflow-x: auto;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            color: #aaa;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .explanation {
+            background: rgba(255, 62, 157, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--accent);
+        }
+
+        .example {
+            background: rgba(37, 117, 252, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .xor-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .xor-table th,
+        .xor-table td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        .xor-table th {
+            background-color: rgba(106, 17, 203, 0.1);
+        }
+
+        .xor-table tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .xor-operation {
+            font-family: monospace;
+            background: #f0f0f0;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+        }
+
+        .char-types {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .char-type {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .printable {
+            background: rgba(0, 179, 155, 0.1);
+            border-left: 4px solid #00b09b;
+        }
+
+        .non-printable {
+            background: rgba(255, 62, 157, 0.1);
+            border-left: 4px solid #ff3e9d;
+        }
+
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .char-types {
+                flex-direction: column;
+            }
+        }
+
+
+        nav {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        nav ul li a {
+            color: var(--dark-color);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            background: rgba(106, 17, 203, 0.05);
+            border-radius: 30px;
+            display: block;
+            text-align: center;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(106, 17, 203, 0.1);
+        }
+
+        nav ul li a:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
+        }
+
+
+
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .bigram-visual {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .grid-container {
+                max-width: 300px;
+            }
+        }
+
+        footer {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 3rem;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .social-links a:hover {
+            transform: translateY(-3px) scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animation subtile au survol */
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .social-links a:hover i {
+            animation: float 1.5s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            footer {
+                padding: 1.5rem 0.5rem;
+            }
+
+            .social-links {
+                gap: 1rem;
+            }
+
+            .social-links a {
+                font-size: 1.2rem;
+                width: 35px;
+                height: 35px;
+                line-height: 35px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Chiffrement Vernam (OTP)</h1>
+        <div class="creator">Réalisé par Chemaa Sarra master 1 RSD Groupe 1</div>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="cesar.html"><i class="fas fa-rotate-right"></i> Chiffrement de César</a></li>
+            <li><a href="Vigenère.html"><i class="fas fa-keyboard"></i> Chiffrement de Vigenère</a></li>
+            <li><a href="polybe.html"><i class="fas fa-border-all"></i> Carré de Polybe</a></li>
+            <li><a href="substitution.html"><i class="fas fa-retweet"></i> Substitution simple</a></li>
+            <li><a href="trithemius.html"><i class="fas fa-sliders"></i> Trithemius</a></li>
+            <li><a href="doubletransposition.html"><i class="fas fa-layer-group"></i> Double transposition</a></li>
+            <li><a href="playfair.html"><i class="fas fa-table-cells"></i> Playfair</a></li>
+            <li><a href="atbash1.html"><i class="fas fa-arrows-left-right"></i> Atbash 1</a></li>
+            <li><a href="porta.html"><i class="fas fa-door-closed"></i> Porta</a></li>
+            <li><a href="atbash2.html"><i class="fas fa-arrows-turn-right"></i> Atbash 2</a></li>
+            <li><a href="autokey.html"><i class="fas fa-robot"></i> Autokey</a></li>
+            <li><a href="albert.html"><i class="fas fa-compact-disc"></i> d'Alberti</a></li>
+            <li><a href="rot13.html"><i class="fas fa-rotate"></i> ROT13</a></li>
+            <li><a href="Vernam.html"><i class="fas fa-user-secret"></i> Vernam OTP</a></li>
+            <li><a href="Beaufort.html"><i class="fas fa-wind"></i> Beaufort</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="method-container">
+            <div class="input-group">
+                <label for="message"><i class="fas fa-font"></i> Message :</label>
+                <textarea id="message" placeholder="Entrez votre texte ici..."></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="key"><i class="fas fa-key"></i> Clé (doit avoir la même longueur que le message) :</label>
+                <textarea id="key" placeholder="Entrez votre clé ou générez-en une..."></textarea>
+                <button class="btn btn-generate" onclick="generateKey()" style="margin-top: 0.5rem;">
+                    <i class="fas fa-random"></i> Générer une clé aléatoire
+                </button>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-encrypt" onclick="processVernam('encrypt')">
+                    <i class="fas fa-lock"></i> Chiffrer
+                </button>
+                <button class="btn btn-decrypt" onclick="processVernam('decrypt')">
+                    <i class="fas fa-lock-open"></i> Déchiffrer
+                </button>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-result"></i> Résultat :</label>
+                <div class="result" id="result"></div>
+            </div>
+
+            <div class="input-group" id="binaryDetails" style="display: none;">
+                <label><i class="fas fa-code"></i> Détails binaires :</label>
+                <div class="result" id="binaryResult"></div>
+            </div>
+
+            <div class="explanation">
+                <h3><i class="fas fa-info-circle"></i> Pourquoi les résultats ne sont-ils pas lisibles ?</h3>
+
+                <div class="char-types">
+                    <div class="char-type printable">
+                        <h4>Caractères imprimables</h4>
+                        <p>Codes ASCII 32-126</p>
+                        <p>A-Z, a-z, 0-9, symboles</p>
+                    </div>
+                    <div class="char-type non-printable">
+                        <h4>Caractères non-imprimables</h4>
+                        <p>Codes ASCII 0-31 et 127</p>
+                        <p>Contrôles, caractères spéciaux</p>
+                    </div>
+                </div>
+
+                <p>Le chiffrement Vernam produit principalement des caractères non-imprimables car :</p>
+                <ul>
+                    <li>L'opération XOR modifie radicalement les bits originaux</li>
+                    <li>La clé aléatoire crée une distribution uniforme des caractères</li>
+                    <li>~50% des résultats tombent dans la plage non-imprimable</li>
+                </ul>
+
+                <div class="example">
+                    <h4><i class="fas fa-lightbulb"></i> Exemple de transformation :</h4>
+                    <p>Message: "A" (65) XOR Clé: "B" (66) = Résultat: "\x03" (3)</p>
+                    <p>Ce caractère \x03 est un "End of Text" en ASCII, donc non affichable.</p>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h3><i class="fas fa-shield-alt"></i> Pourquoi c'est une bonne chose ?</h3>
+                <p>Un bon chiffrement doit :</p>
+                <ol>
+                    <li>Produire une sortie indistinguable du hasard</li>
+                    <li>Ne pas conserver les motifs du texte original</li>
+                    <li>Rendre impossible toute déduction sur le message</li>
+                </ol>
+                <p>Les résultats "bizarres" prouvent que ces conditions sont remplies.</p>
+            </div>
+        </div>
+
+        <div class="code-block">
+            <div class="code-header">
+                <span>Implémentation en JavaScript</span>
+                <button class="copy-btn" onclick="copyCode()">
+                    <i class="far fa-copy"></i> Copier
+                </button>
+            </div>
+            <pre><code>// Fonction principale Vernam
+function vernamCipher(text, key) {
+    let result = '';
+    for (let i = 0; i < text.length; i++) {
+        // XOR entre les codes ASCII
+        const charCode = text.charCodeAt(i) ^ key.charCodeAt(i);
+        result += String.fromCharCode(charCode);
+    }
+    return result;
+}
+
+// Convertir en représentation hexadécimale
+function toHexString(str) {
+    let hex = '';
+    for (let i = 0; i < str.length; i++) {
+        const code = str.charCodeAt(i);
+        // Affiche les non-imprimables en hexa
+        hex += code < 32 || code > 126 
+            ? '\\x' + code.toString(16).padStart(2, '0')
+            : str[i];
+    }
+    return hex;
+}</code></pre>
+        </div>
+    </div>
+
+    <script>
+        // Générer une clé aléatoire
+        function generateKey() {
+            const message = document.getElementById('message').value;
+            const keyLength = message.length;
+
+            if (!keyLength) {
+                alert("Veuillez d'abord entrer un message");
+                return;
+            }
+
+            let key = '';
+            for (let i = 0; i < keyLength; i++) {
+                // Génère tous les caractères ASCII (0-255)
+                key += String.fromCharCode(Math.floor(Math.random() * 256));
+            }
+
+            document.getElementById('key').value = key;
+        }
+
+        // Afficher les détails binaires
+        function showBinaryDetails(message, key, result) {
+            let binaryHtml = '<table class="xor-table">';
+            binaryHtml += `
+            <tr>
+                <th>Position</th>
+                <th>Message</th>
+                <th>Clé</th>
+                <th>Opération</th>
+                <th>Résultat</th>
+            </tr>`;
+
+            for (let i = 0; i < message.length; i++) {
+                const msgChar = message[i];
+                const keyChar = key[i];
+                const resChar = result[i];
+
+                binaryHtml += `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${msgChar} (${msgChar.charCodeAt(0)})</td>
+                <td>${keyChar} (${keyChar.charCodeAt(0)})</td>
+                <td>XOR</td>
+                <td>${resChar.charCodeAt(0) < 32 || resChar.charCodeAt(0) > 126
+                        ? '\\x' + resChar.charCodeAt(0).toString(16).padStart(2, '0')
+                        : resChar} (${resChar.charCodeAt(0)})</td>
+            </tr>`;
+            }
+
+            binaryHtml += '</table>';
+            document.getElementById('binaryResult').innerHTML = binaryHtml;
+            document.getElementById('binaryDetails').style.display = 'block';
+        }
+
+        // Traitement Vernam
+        function processVernam(operation) {
+            const message = document.getElementById('message').value;
+            const key = document.getElementById('key').value;
+            const resultElement = document.getElementById('result');
+
+            if (!message) {
+                resultElement.textContent = "Veuillez entrer un message";
+                return;
+            }
+
+            if (!key) {
+                resultElement.textContent = "Veuillez entrer une clé";
+                return;
+            }
+
+            if (message.length !== key.length) {
+                resultElement.textContent = "Erreur : La clé doit avoir exactement la même longueur que le message";
+                return;
+            }
+
+            // Chiffrement/déchiffrement (même opération)
+            let result = '';
+            for (let i = 0; i < message.length; i++) {
+                result += String.fromCharCode(message.charCodeAt(i) ^ key.charCodeAt(i));
+            }
+
+            // Formatage du résultat
+            let hexResult = '';
+            let printableCount = 0;
+
+            for (let i = 0; i < result.length; i++) {
+                const code = result.charCodeAt(i);
+                if (code >= 32 && code <= 126) printableCount++;
+                hexResult += code < 32 || code > 126
+                    ? '\\x' + code.toString(16).padStart(2, '0')
+                    : result[i];
+            }
+
+            const nonPrintablePercent = Math.round((1 - printableCount / result.length) * 100);
+
+            resultElement.innerHTML = `
+            <strong>Texte ${operation === 'encrypt' ? 'chiffré' : 'déchiffré'} :</strong>
+            <div style="margin:10px 0; padding:10px; background:#f0f0f0; border-radius:5px;">
+                ${hexResult}
+            </div>
+            <div style="color:#666; font-size:0.9em;">
+                ${nonPrintablePercent}% de caractères non-imprimables - 
+                C'est normal et indique un bon chiffrement
+            </div>
+        `;
+
+            showBinaryDetails(message, key, result);
+        }
+
+        function copyCode() {
+            const code = document.querySelector('.code-block code').innerText;
+            navigator.clipboard.writeText(code)
+                .then(() => {
+                    const btn = document.querySelector('.copy-btn');
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="far fa-copy"></i> Copier';
+                    }, 2000);
+                });
+        }
+    </script>
+
+    <footer>
+        <p>Projet réalisé dans le cadre du module de cryptographie (option) encadré par Dr. Bourmel</p>
+        <p>&copy; 2025 Chemaa Sarra - Tous droits réservés</p>
+        <div class="social-links">
+            <a href="https://github.com/sarrachemaa" target="_blank" aria-label="GitHub"><i
+                    class="fab fa-github"></i></a>
+            <a href="https://dz.linkedin.com/in/sarra-chemaa-0757502a3" target="_blank" aria-label="LinkedIn"><i
+                    class="fab fa-linkedin-in"></i></a>
+            <a href="sarrachemaa@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+    </footer>
+</body>
+
+</html>

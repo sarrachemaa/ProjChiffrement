@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chiffrement de Polybe</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <h1>Chiffrement de Polybe</h1>
+        <div class="creator">Réalisé par Chemaa Sarra master 1 RSD Groupe 1</div>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="cesar.html"><i class="fas fa-rotate-right"></i> Chiffrement de César</a></li>
+            <li><a href="Vigenère.html"><i class="fas fa-keyboard"></i> Chiffrement de Vigenère</a></li>
+            <li><a href="polybe.html"><i class="fas fa-border-all"></i> Carré de Polybe</a></li>
+            <li><a href="substitution.html"><i class="fas fa-retweet"></i> Substitution simple</a></li>
+            <li><a href="trithemius.html"><i class="fas fa-sliders"></i> Trithemius</a></li>
+            <li><a href="doubletransposition.html"><i class="fas fa-layer-group"></i> Double transposition</a></li>
+            <li><a href="playfair.html"><i class="fas fa-table-cells"></i> Playfair</a></li>
+            <li><a href="atbash1.html"><i class="fas fa-arrows-left-right"></i> Atbash 1</a></li>
+            <li><a href="porta.html"><i class="fas fa-door-closed"></i> Porta</a></li>
+            <li><a href="atbash2.html"><i class="fas fa-arrows-turn-right"></i> Atbash 2</a></li>
+            <li><a href="autokey.html"><i class="fas fa-robot"></i> Autokey</a></li>
+            <li><a href="albert.html"><i class="fas fa-compact-disc"></i> d'Alberti</a></li>
+            <li><a href="rot13.html"><i class="fas fa-rotate"></i> ROT13</a></li>
+            <li><a href="Vernam.html"><i class="fas fa-user-secret"></i> Vernam OTP</a></li>
+            <li><a href="Beaufort.html"><i class="fas fa-wind"></i> Beaufort</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="method-container">
+            <div class="input-group">
+                <label for="message">Message :</label>
+                <input type="text" id="message" placeholder="Entrez votre message">
+            </div>
+
+            <div class="input-group">
+                <label for="operation">Opération :</label>
+                <select id="operation">
+                    <option value="encrypt">Chiffrer</option>
+                    <option value="decrypt">Déchiffrer</option>
+                </select>
+            </div>
+
+            <button onclick="processPolybe()">Exécuter</button>
+
+            <div class="input-group">
+                <label>Résultat :</label>
+                <div class="result" id="result"></div>
+            </div>
+
+            <div class="polybe-grid">
+                <h3>Matrice de Polybe :</h3>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th>1</th>
+                        <th>2</th>
+                        <th>3</th>
+                        <th>4</th>
+                        <th>5</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>A</td>
+                        <td>B</td>
+                        <td>C</td>
+                        <td>D</td>
+                        <td>E</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>F</td>
+                        <td>G</td>
+                        <td>H</td>
+                        <td>I</td>
+                        <td>K</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>L</td>
+                        <td>M</td>
+                        <td>N</td>
+                        <td>O</td>
+                        <td>P</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Q</td>
+                        <td>R</td>
+                        <td>S</td>
+                        <td>T</td>
+                        <td>U</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>V</td>
+                        <td>W</td>
+                        <td>X</td>
+                        <td>Y</td>
+                        <td>Z</td>
+                    </tr>
+                </table>
+                <p class="note">Note : Les lettres 'I' et 'J' partagent la même case (24)</p>
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h3>Explication :</h3>
+            <p><strong>Principe :</strong> On utilise un carré de 5x5 (25 lettres, souvent I=J). Chaque lettre est
+                remplacée par sa position dans le carré : ligne + colonne.</p>
+            <p><strong>Exemple :</strong></p>
+            <ul>
+                <li>A = 11, B = 12, ..., L = 31, etc.</li>
+                <li>Texte : SALUT → 43 11 31 45 44</li>
+            </ul>
+            <p><strong>Particularités :</strong></p>
+            <ol>
+                <li>L'alphabet est réduit à 25 lettres (I et J partagent la même case)</li>
+                <li>Les chiffres représentent les coordonnées (ligne, colonne)</li>
+                <li>Méthode simple mais efficace pour l'époque</li>
+            </ol>
+        </div>
+
+        <div class="code-block">
+            <code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+#define MAX_LEN 200
+
+// Grille de Polybe (5x5, I=J)
+char grille[5][5] = {
+    {'A','B','C','D','E'},
+    {'F','G','H','I','K'},
+    {'L','M','N','O','P'},
+    {'Q','R','S','T','U'},
+    {'V','W','X','Y','Z'}
+};
+
+// Afficher la matrice de Polybe
+void afficherGrille() {
+    printf("\n--- Matrice de Polybe ---\n    1 2 3 4 5\n");
+    for (int i = 0; i < 5; i++) {
+        printf("%d | ", i + 1);
+        for (int j = 0; j < 5; j++) {
+            printf("%c ", grille[i][j]);
+        }
+        printf("\n");
+    }
+    printf("-------------------------\n");
+}
+
+// Préparer le texte : majuscules + I à la place de J
+void preparerTexte(char* text) {
+    for (int i = 0; text[i]; i++) {
+        text[i] = toupper(text[i]);
+        if (text[i] == 'J') text[i] = 'I';
+    }
+}
+
+// Obtenir code Polybe d'un caractère
+void getCode(char c, char* code) {
+    for (int i = 0; i < 5; i++)
+        for (int j = 0; j < 5; j++)
+            if (grille[i][j] == c) {
+                code[0] = '1' + i;
+                code[1] = '1' + j;
+                return;
+            }
+}
+
+// Obtenir caractère à partir de code Polybe
+char getCharFromCode(char l, char c) {
+    int row = l - '1';
+    int col = c - '1';
+    if (row >= 0 && row < 5 && col >= 0 && col < 5)
+        return grille[row][col];
+    else
+        return '?';
+}
+
+// Chiffrement
+void chiffrer(char* text, char* result) {
+    char temp[MAX_LEN] = "";
+    char code[3]; code[2] = '\0';
+
+    preparerTexte(text);
+
+    for (int i = 0; text[i]; i++) {
+        if (isalpha(text[i])) {
+            getCode(text[i], code);
+            strcat(temp, code);
+        }
+    }
+    strcpy(result, temp);
+}
+
+// Déchiffrement
+void dechiffrer(char* code, char* result) {
+    int len = strlen(code);
+    int idx = 0;
+
+    for (int i = 0; i < len; i += 2) {
+        if (isdigit(code[i]) && isdigit(code[i + 1])) {
+            result[idx++] = getCharFromCode(code[i], code[i + 1]);
+        }
+    }
+    result[idx] = '\0';
+}
+
+int main() {
+    char message[MAX_LEN];
+    char result[MAX_LEN];
+    int choix;
+
+    afficherGrille();
+
+    printf("Entrer un mot/code : ");
+    scanf("%s", message);
+
+    printf("Choisissez l'opération :\n");
+    printf("1 - Chiffrer\n");
+    printf("2 - Déchiffrer\n");
+    printf("Votre choix : ");
+    scanf("%d", &choix);
+
+    if (choix == 1) {
+        chiffrer(message, result);
+        printf("Texte chiffré (Polybe) : %s\n", result);
+    } else if (choix == 2) {
+        dechiffrer(message, result);
+        printf("Texte déchiffré (Polybe) : %s\n", result);
+    } else {
+        printf("Choix invalide.\n");
+    }
+
+    return 0;
+}</code>
+        </div>
+    </div>
+
+
+    <script>
+        function processPolybe() {
+            const message = document.getElementById('message').value.toUpperCase();
+            const operation = document.getElementById('operation').value;
+            const resultElement = document.getElementById('result');
+
+            if (!message) {
+                resultElement.textContent = "Veuillez entrer un message";
+                return;
+            }
+
+            let result;
+            if (operation === 'encrypt') {
+                result = polybeEncrypt(message);
+                resultElement.innerHTML = `<strong>Texte chiffré :</strong> ${result}`;
+            } else {
+                result = polybeDecrypt(message);
+                resultElement.innerHTML = `<strong>Texte déchiffré :</strong> ${result}`;
+            }
+        }
+
+        const polybeGrid = [
+            ['A', 'B', 'C', 'D', 'E'],
+            ['F', 'G', 'H', 'I', 'K'],
+            ['L', 'M', 'N', 'O', 'P'],
+            ['Q', 'R', 'S', 'T', 'U'],
+            ['V', 'W', 'X', 'Y', 'Z']
+        ];
+
+        function polybeEncrypt(text) {
+            let result = '';
+            const processedText = text.replace(/J/g, 'I');
+
+            for (let char of processedText) {
+                if (/^[A-Z]$/.test(char)) {
+                    for (let i = 0; i < 5; i++) {
+                        for (let j = 0; j < 5; j++) {
+                            if (polybeGrid[i][j] === char) {
+                                result += (i + 1) + '' + (j + 1);
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    result += char;
+                }
+            }
+
+            return result;
+        }
+
+        function polybeDecrypt(code) {
+            let result = '';
+
+            for (let i = 0; i < code.length; i += 2) {
+                const pair = code.substr(i, 2);
+                if (/^[1-5]{2}$/.test(pair)) {
+                    const row = parseInt(pair[0]) - 1;
+                    const col = parseInt(pair[1]) - 1;
+                    result += polybeGrid[row][col];
+                } else {
+                    result += pair;
+                }
+            }
+
+            return result;
+        }
+    </script>
+
+    <style>
+        .polybe-grid {
+            margin-top: 2rem;
+            background: rgba(106, 17, 203, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+
+        .polybe-grid table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .polybe-grid th,
+        .polybe-grid td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .polybe-grid th {
+            background-color: #6a11cb;
+            color: white;
+        }
+
+        .polybe-grid tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .polybe-grid .note {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+    </style>
+    <footer>
+        <p>Projet réalisé dans le cadre du module de cryptographie (option) encadré par Dr. Bourmel</p>
+        <p>&copy; 2025 Chemaa Sarra - Tous droits réservés</p>
+        <div class="social-links">
+            <a href="https://github.com/sarrachemaa" target="_blank" aria-label="GitHub"><i
+                    class="fab fa-github"></i></a>
+            <a href="https://dz.linkedin.com/in/sarra-chemaa-0757502a3" target="_blank" aria-label="LinkedIn"><i
+                    class="fab fa-linkedin-in"></i></a>
+            <a href="sarrachemaa@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+    </footer>
+</body>
+
+</html>

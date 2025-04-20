@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Substitution Simple</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <h1>Substitution Simple</h1>
+        <div class="creator">Réalisé par Chemaa Sarra master 1 RSD Groupe 1</div>
+
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="cesar.html"><i class="fas fa-rotate-right"></i> Chiffrement de César</a></li>
+            <li><a href="Vigenère.html"><i class="fas fa-keyboard"></i> Chiffrement de Vigenère</a></li>
+            <li><a href="polybe.html"><i class="fas fa-border-all"></i> Carré de Polybe</a></li>
+            <li><a href="substitution.html"><i class="fas fa-retweet"></i> Substitution simple</a></li>
+            <li><a href="trithemius.html"><i class="fas fa-sliders"></i> Trithemius</a></li>
+            <li><a href="doubletransposition.html"><i class="fas fa-layer-group"></i> Double transposition</a></li>
+            <li><a href="playfair.html"><i class="fas fa-table-cells"></i> Playfair</a></li>
+            <li><a href="atbash1.html"><i class="fas fa-arrows-left-right"></i> Atbash 1</a></li>
+            <li><a href="porta.html"><i class="fas fa-door-closed"></i> Porta</a></li>
+            <li><a href="atbash2.html"><i class="fas fa-arrows-turn-right"></i> Atbash 2</a></li>
+            <li><a href="autokey.html"><i class="fas fa-robot"></i> Autokey</a></li>
+            <li><a href="albert.html"><i class="fas fa-compact-disc"></i> d'Alberti</a></li>
+            <li><a href="rot13.html"><i class="fas fa-rotate"></i> ROT13</a></li>
+            <li><a href="Vernam.html"><i class="fas fa-user-secret"></i> Vernam OTP</a></li>
+            <li><a href="Beaufort.html"><i class="fas fa-wind"></i> Beaufort</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="method-container">
+            <div class="input-group">
+                <label for="message">Message :</label>
+                <textarea id="message" placeholder="Entrez votre message" rows="3"></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="operation">Opération :</label>
+                <select id="operation">
+                    <option value="encrypt">Chiffrer</option>
+                    <option value="decrypt">Déchiffrer</option>
+                </select>
+            </div>
+
+            <button onclick="processSubstitution()">Exécuter</button>
+
+            <div class="input-group">
+                <label>Résultat :</label>
+                <div class="result" id="result"></div>
+            </div>
+
+            <div class="substitution-table">
+                <h3>Table de Substitution :</h3>
+                <div class="alphabet-row">
+                    <div class="alphabet-header">Original :</div>
+                    <div>A B C D E F G H I J K L M N O P Q R S T U V W X Y Z</div>
+                </div>
+                <div class="alphabet-row">
+                    <div class="alphabet-header">Substitution :</div>
+                    <div>Q W E R T Y U I O P A S D F G H J K L Z X C V B N M</div>
+                </div>
+                <p class="note">Chaque lettre est remplacée par sa correspondante dans la ligne du bas</p>
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h3>Explication :</h3>
+            <p><strong>Principe :</strong> Chaque lettre est remplacée une seule fois par une autre selon un alphabet
+                substitué fixe.</p>
+
+            <p><strong>Exemple :</strong></p>
+            <ul>
+                <li>Alphabet normal : A B C D E F...</li>
+                <li>Alphabet chiffré : Q W E R T Y...</li>
+                <li>Texte : "ABC" → "QWE"</li>
+            </ul>
+
+            <p><strong>Caractéristiques :</strong></p>
+            <div class="features">
+                <div class="feature">
+                    <h4>Avantages</h4>
+                    <ul>
+                        <li>Plus sécurisé que le chiffrement de César</li>
+                        <li>Simple à implémenter</li>
+                    </ul>
+                </div>
+                <div class="feature">
+                    <h4>Inconvénients</h4>
+                    <ul>
+                        <li>Vulnérable à l'analyse fréquentielle</li>
+                        <li>Nécessite de garder la clé secrète</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p><strong>Méthode :</strong></p>
+            <ol>
+                <li>Créer une table de correspondance fixe</li>
+                <li>Remplacer chaque lettre par sa correspondante</li>
+                <li>Pour déchiffrer, utiliser la table inverse</li>
+            </ol>
+        </div>
+
+        <div class="code-block">
+            <code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+#define MAX_LEN 200
+
+// Clé de substitution
+const char CLE_SUBSTITUTION[26] = {
+    'Q','W','E','R','T','Y','U','I','O','P',
+    'A','S','D','F','G','H','J','K','L','Z',
+    'X','C','V','B','N','M'
+};
+
+// Créer la clé inverse pour déchiffrement
+void creerCleInversee(char cleInverse[26]) {
+    for (int i = 0; i < 26; i++) {
+        cleInverse[CLE_SUBSTITUTION[i] - 'A'] = 'A' + i;
+    }
+}
+
+// Afficher la table de substitution
+void afficherTable() {
+    printf("\n--- Tableau de Substitution ---\n");
+    printf("Lettre : ");
+    for (char c = 'A'; c <= 'Z'; c++) {
+        printf("%c ", c);
+    }
+    printf("\nSubst. : ");
+    for (int i = 0; i < 26; i++) {
+        printf("%c ", CLE_SUBSTITUTION[i]);
+    }
+    printf("\n-------------------------------\n\n");
+}
+
+// Chiffrement
+void substitutionEncrypt(const char* texte, char* chiffré) {
+    for (int i = 0; texte[i]; i++) {
+        if (isalpha(texte[i])) {
+            char maj = toupper(texte[i]);
+            chiffré[i] = CLE_SUBSTITUTION[maj - 'A'];
+        } else {
+            chiffré[i] = texte[i];
+        }
+    }
+    chiffré[strlen(texte)] = '\0';
+}
+
+// Déchiffrement
+void substitutionDecrypt(const char* texte, char* dechiffré) {
+    char cleInverse[26];
+    creerCleInversee(cleInverse);
+
+    for (int i = 0; texte[i]; i++) {
+        if (isalpha(texte[i])) {
+            char maj = toupper(texte[i]);
+            dechiffré[i] = cleInverse[maj - 'A'];
+        } else {
+            dechiffré[i] = texte[i];
+        }
+    }
+    dechiffré[strlen(texte)] = '\0';
+}
+
+int main() {
+    char texte[MAX_LEN];
+    char resultat[MAX_LEN];
+    int choix;
+
+    afficherTable();
+
+    printf("Entrer le texte : ");
+    fgets(texte, sizeof(texte), stdin);
+    texte[strcspn(texte, "\n")] = '\0';
+
+    printf("Choisir l'opération :\n1 - Chiffrer\n2 - Déchiffrer\nVotre choix : ");
+    scanf("%d", &choix);
+
+    if (choix == 1) {
+        substitutionEncrypt(texte, resultat);
+        printf("Texte chiffré : %s\n", resultat);
+    } else if (choix == 2) {
+        substitutionDecrypt(texte, resultat);
+        printf("Texte déchiffré : %s\n", resultat);
+    } else {
+        printf("Choix invalide.\n");
+    }
+
+    return 0;
+}</code>
+        </div>
+    </div>
+
+
+    <script>
+        // Clé de substitution
+        const substitutionKey = {
+            'A': 'Q', 'B': 'W', 'C': 'E', 'D': 'R', 'E': 'T',
+            'F': 'Y', 'G': 'U', 'H': 'I', 'I': 'O', 'J': 'P',
+            'K': 'A', 'L': 'S', 'M': 'D', 'N': 'F', 'O': 'G',
+            'P': 'H', 'Q': 'J', 'R': 'K', 'S': 'L', 'T': 'Z',
+            'U': 'X', 'V': 'C', 'W': 'V', 'X': 'B', 'Y': 'N',
+            'Z': 'M'
+        };
+
+        // Créer la clé inverse
+        const inverseKey = {};
+        for (const [key, value] of Object.entries(substitutionKey)) {
+            inverseKey[value] = key;
+        }
+
+        function processSubstitution() {
+            const message = document.getElementById('message').value.toUpperCase();
+            const operation = document.getElementById('operation').value;
+            const resultElement = document.getElementById('result');
+
+            if (!message) {
+                resultElement.textContent = "Veuillez entrer un message";
+                return;
+            }
+
+            let result = '';
+            if (operation === 'encrypt') {
+                result = encryptSubstitution(message);
+                resultElement.innerHTML = `<strong>Texte chiffré :</strong> ${result}`;
+            } else {
+                result = decryptSubstitution(message);
+                resultElement.innerHTML = `<strong>Texte déchiffré :</strong> ${result}`;
+            }
+        }
+
+        function encryptSubstitution(text) {
+            let result = '';
+            for (let char of text) {
+                if (/^[A-Z]$/.test(char)) {
+                    result += substitutionKey[char] || char;
+                } else {
+                    result += char;
+                }
+            }
+            return result;
+        }
+
+        function decryptSubstitution(text) {
+            let result = '';
+            for (let char of text) {
+                if (/^[A-Z]$/.test(char)) {
+                    result += inverseKey[char] || char;
+                } else {
+                    result += char;
+                }
+            }
+            return result;
+        }
+    </script>
+
+    <style>
+        .substitution-table {
+            margin-top: 2rem;
+            background: rgba(106, 17, 203, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+
+        .alphabet-row {
+            display: flex;
+            margin-bottom: 0.5rem;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .alphabet-header {
+            font-weight: bold;
+            width: 100px;
+            color: var(--primary-color);
+        }
+
+        .note {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+            margin-top: 1rem;
+        }
+
+        .features {
+            display: flex;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature {
+            flex: 1;
+            background: rgba(106, 17, 203, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .feature h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 0.5rem;
+        }
+
+        .feature ul {
+            padding-left: 1.2rem;
+        }
+
+        .feature li {
+            margin-bottom: 0.3rem;
+        }
+    </style>
+    <footer>
+        <p>Projet réalisé dans le cadre du module de cryptographie (option) encadré par Dr. Bourmel</p>
+        <p>&copy; 2025 Chemaa Sarra - Tous droits réservés</p>
+        <div class="social-links">
+            <a href="https://github.com/sarrachemaa" target="_blank" aria-label="GitHub"><i
+                    class="fab fa-github"></i></a>
+            <a href="https://dz.linkedin.com/in/sarra-chemaa-0757502a3" target="_blank" aria-label="LinkedIn"><i
+                    class="fab fa-linkedin-in"></i></a>
+            <a href="sarrachemaa@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+    </footer>
+</body>
+
+</html>

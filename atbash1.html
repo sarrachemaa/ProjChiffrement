@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atbash - Projet Cryptographie</title>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --accent: #ff3e9d;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .method-container {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-encrypt {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+        }
+
+        .btn-decrypt {
+            background: linear-gradient(to right, #ff512f, #dd2476);
+        }
+
+        .result {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .code-block {
+            background: #1e1e2d;
+            color: #e0e0e0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            overflow-x: auto;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            color: #aaa;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .alphabet-table {
+            display: grid;
+            grid-template-columns: repeat(13, 1fr);
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .alphabet-cell {
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .original {
+            background: rgba(106, 17, 203, 0.1);
+            color: var(--primary);
+        }
+
+        .transformed {
+            background: rgba(37, 117, 252, 0.1);
+            color: var(--secondary);
+        }
+
+        .explanation {
+            background: rgba(255, 62, 157, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--accent);
+        }
+
+        nav {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        nav ul li a {
+            color: var(--dark-color);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            background: rgba(106, 17, 203, 0.05);
+            border-radius: 30px;
+            display: block;
+            text-align: center;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(106, 17, 203, 0.1);
+        }
+
+        nav ul li a:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
+        }
+
+
+
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .bigram-visual {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .grid-container {
+                max-width: 300px;
+            }
+        }
+
+        footer {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 3rem;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .social-links a:hover {
+            transform: translateY(-3px) scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animation subtile au survol */
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .social-links a:hover i {
+            animation: float 1.5s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            footer {
+                padding: 1.5rem 0.5rem;
+            }
+
+            .social-links {
+                gap: 1rem;
+            }
+
+            .social-links a {
+                font-size: 1.2rem;
+                width: 35px;
+                height: 35px;
+                line-height: 35px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Chiffrement Atbash 1 </h1>
+
+        <div class="creator">Réalisé par Chemaa Sarra master 1 RSD Groupe 1</div>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="cesar.html"><i class="fas fa-rotate-right"></i> Chiffrement de César</a></li>
+            <li><a href="Vigenère.html"><i class="fas fa-keyboard"></i> Chiffrement de Vigenère</a></li>
+            <li><a href="polybe.html"><i class="fas fa-border-all"></i> Carré de Polybe</a></li>
+            <li><a href="substitution.html"><i class="fas fa-retweet"></i> Substitution simple</a></li>
+            <li><a href="trithemius.html"><i class="fas fa-sliders"></i> Trithemius</a></li>
+            <li><a href="doubletransposition.html"><i class="fas fa-layer-group"></i> Double transposition</a></li>
+            <li><a href="playfair.html"><i class="fas fa-table-cells"></i> Playfair</a></li>
+            <li><a href="atbash1.html"><i class="fas fa-arrows-left-right"></i> Atbash 1</a></li>
+            <li><a href="porta.html"><i class="fas fa-door-closed"></i> Porta</a></li>
+            <li><a href="atbash2.html"><i class="fas fa-arrows-turn-right"></i> Atbash 2</a></li>
+            <li><a href="autokey.html"><i class="fas fa-robot"></i> Autokey</a></li>
+            <li><a href="albert.html"><i class="fas fa-compact-disc"></i> d'Alberti</a></li>
+            <li><a href="rot13.html"><i class="fas fa-rotate"></i> ROT13</a></li>
+            <li><a href="Vernam.html"><i class="fas fa-user-secret"></i> Vernam OTP</a></li>
+            <li><a href="Beaufort.html"><i class="fas fa-wind"></i> Beaufort</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="method-container">
+            <div class="input-group">
+                <label for="message"><i class="fas fa-font"></i> Message :</label>
+                <textarea id="message" placeholder="Entrez votre texte ici..."></textarea>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-encrypt" onclick="processAtbash('encrypt')">
+                    <i class="fas fa-lock"></i> Chiffrer
+                </button>
+                <button class="btn btn-decrypt" onclick="processAtbash('decrypt')">
+                    <i class="fas fa-lock-open"></i> Déchiffrer
+                </button>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-result"></i> Résultat :</label>
+                <div class="result" id="result"></div>
+            </div>
+
+            <div class="explanation">
+                <h3><i class="fas fa-info-circle"></i> Comment ça marche ?</h3>
+                <p>Atbash est un chiffrement par substitution qui remplace chaque lettre par son opposée dans l'alphabet
+                    :</p>
+                <p>A ↔ Z, B ↔ Y, C ↔ X, ..., M ↔ N</p>
+                <p>Le même algorithme sert à chiffrer et déchiffrer.</p>
+            </div>
+
+            <h3><i class="fas fa-table"></i> Table de correspondance</h3>
+            <div class="alphabet-table">
+                <div class="alphabet-cell original">A</div>
+                <div class="alphabet-cell original">B</div>
+                <div class="alphabet-cell original">C</div>
+                <div class="alphabet-cell original">D</div>
+                <div class="alphabet-cell original">E</div>
+                <div class="alphabet-cell original">F</div>
+                <div class="alphabet-cell original">G</div>
+                <div class="alphabet-cell original">H</div>
+                <div class="alphabet-cell original">I</div>
+                <div class="alphabet-cell original">J</div>
+                <div class="alphabet-cell original">K</div>
+                <div class="alphabet-cell original">L</div>
+                <div class="alphabet-cell original">M</div>
+
+                <div class="alphabet-cell transformed">Z</div>
+                <div class="alphabet-cell transformed">Y</div>
+                <div class="alphabet-cell transformed">X</div>
+                <div class="alphabet-cell transformed">W</div>
+                <div class="alphabet-cell transformed">V</div>
+                <div class="alphabet-cell transformed">U</div>
+                <div class="alphabet-cell transformed">T</div>
+                <div class="alphabet-cell transformed">S</div>
+                <div class="alphabet-cell transformed">R</div>
+                <div class="alphabet-cell transformed">Q</div>
+                <div class="alphabet-cell transformed">P</div>
+                <div class="alphabet-cell transformed">O</div>
+                <div class="alphabet-cell transformed">N</div>
+            </div>
+        </div>
+
+        <div class="code-block">
+            <div class="code-header">
+                <span>Implémentation en C</span>
+                <button class="copy-btn" onclick="copyCode()">
+                    <i class="far fa-copy"></i> Copier
+                </button>
+            </div>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+void atbash(char *texte) {
+    for (int i = 0; texte[i] != '\0'; i++) {
+        if (isupper(texte[i])) {
+            texte[i] = 'Z' - (texte[i] - 'A');
+        } else if (islower(texte[i])) {
+            texte[i] = 'z' - (texte[i] - 'a');
+        }
+    }
+}
+
+int main() {
+    char message[100];
+    int choix;
+
+    printf("1. Chiffrer\n2. Déchiffrer\nChoix : ");
+    scanf("%d", &choix);
+    getchar();
+
+    printf("Message : ");
+    fgets(message, sizeof(message), stdin);
+    message[strcspn(message, "\n")] = '\0';
+
+    atbash(message);
+    
+    if (choix == 1) {
+        printf("Texte chiffré : %s\n", message);
+    } else {
+        printf("Texte déchiffré : %s\n", message);
+    }
+
+    return 0;
+}</code></pre>
+        </div>
+    </div>
+
+    <script>
+        function processAtbash(operation) {
+            const message = document.getElementById('message').value;
+            const resultElement = document.getElementById('result');
+
+            if (!message.trim()) {
+                resultElement.textContent = "Veuillez entrer un message";
+                return;
+            }
+
+            let result = "";
+            for (let char of message) {
+                if (/[A-Z]/.test(char)) {
+                    result += String.fromCharCode(90 - (char.charCodeAt(0) - 65));
+                } else if (/[a-z]/.test(char)) {
+                    result += String.fromCharCode(122 - (char.charCodeAt(0) - 97));
+                } else {
+                    result += char;
+                }
+            }
+
+            const operationText = operation === 'encrypt' ? 'chiffré' : 'déchiffré';
+            resultElement.innerHTML = `<strong>Texte ${operationText} :</strong>\n${result}`;
+        }
+
+        function copyCode() {
+            const code = document.querySelector('.code-block code').innerText;
+            navigator.clipboard.writeText(code)
+                .then(() => {
+                    const btn = document.querySelector('.copy-btn');
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="far fa-copy"></i> Copier';
+                    }, 2000);
+                });
+        }
+    </script>
+    <footer>
+        <p>Projet réalisé dans le cadre du module de cryptographie (option) encadré par Dr. Bourmel</p>
+        <p>&copy; 2025 Chemaa Sarra - Tous droits réservés</p>
+        <div class="social-links">
+            <a href="https://github.com/sarrachemaa" target="_blank" aria-label="GitHub"><i
+                    class="fab fa-github"></i></a>
+            <a href="https://dz.linkedin.com/in/sarra-chemaa-0757502a3" target="_blank" aria-label="LinkedIn"><i
+                    class="fab fa-linkedin-in"></i></a>
+            <a href="sarrachemaa@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+    </footer>
+</body>
+
+</html>

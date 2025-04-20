@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chiffrement de Vigenère</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <h1>Chiffrement de Vigenère</h1>
+        <div class="creator">Réalisé par Chemaa Sarra master 1 RSD Groupe 1</div>
+
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="cesar.html"><i class="fas fa-rotate-right"></i> Chiffrement de César</a></li>
+            <li><a href="Vigenère.html"><i class="fas fa-keyboard"></i> Chiffrement de Vigenère</a></li>
+            <li><a href="polybe.html"><i class="fas fa-border-all"></i> Carré de Polybe</a></li>
+            <li><a href="substitution.html"><i class="fas fa-retweet"></i> Substitution simple</a></li>
+            <li><a href="trithemius.html"><i class="fas fa-sliders"></i> Trithemius</a></li>
+            <li><a href="doubletransposition.html"><i class="fas fa-layer-group"></i> Double transposition</a></li>
+            <li><a href="playfair.html"><i class="fas fa-table-cells"></i> Playfair</a></li>
+            <li><a href="atbash1.html"><i class="fas fa-arrows-left-right"></i> Atbash 1</a></li>
+            <li><a href="porta.html"><i class="fas fa-door-closed"></i> Porta</a></li>
+            <li><a href="atbash2.html"><i class="fas fa-arrows-turn-right"></i> Atbash 2</a></li>
+            <li><a href="autokey.html"><i class="fas fa-robot"></i> Autokey</a></li>
+            <li><a href="albert.html"><i class="fas fa-compact-disc"></i> d'Alberti</a></li>
+            <li><a href="rot13.html"><i class="fas fa-rotate"></i> ROT13</a></li>
+            <li><a href="Vernam.html"><i class="fas fa-user-secret"></i> Vernam OTP</a></li>
+            <li><a href="Beaufort.html"><i class="fas fa-wind"></i> Beaufort</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="method-container">
+            <div class="input-group">
+                <label for="message">Message :</label>
+                <textarea id="message" placeholder="Entrez votre message" rows="3"></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="key">Clé :</label>
+                <input type="text" id="key" placeholder="Entrez la clé">
+            </div>
+
+            <div class="input-group">
+                <label for="operation">Opération :</label>
+                <select id="operation">
+                    <option value="encrypt">Chiffrer</option>
+                    <option value="decrypt">Déchiffrer</option>
+                </select>
+            </div>
+
+            <button onclick="processVigenere()">Exécuter</button>
+
+            <div class="input-group">
+                <label>Résultat :</label>
+                <div class="result" id="result"></div>
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h3>Explication :</h3>
+            <p><strong>Principe :</strong> C'est une substitution polyalphabétique. On utilise un mot-clé pour
+                déterminer le décalage de chaque lettre.</p>
+
+            <p><strong>Exemple :</strong></p>
+            <ul>
+                <li>Texte clair : BONJOUR</li>
+                <li>Mot-clé : CLECLEC</li>
+                <li>Décalages : C=2, L=11, E=4, etc.</li>
+                <li>Résultat : DZPFMZV</li>
+            </ul>
+
+            <p><strong>Formules :</strong></p>
+            <div class="formulas">
+                <div class="formula">
+                    <h4>Chiffrement :</h4>
+                    <p>C[i] = (L[i] + K[i]) mod 26</p>
+                </div>
+                <div class="formula">
+                    <h4>Déchiffrement :</h4>
+                    <p>L[i] = (C[i] - K[i] + 26) mod 26</p>
+                </div>
+            </div>
+
+            <p><strong>Particularités :</strong></p>
+            <ol>
+                <li>Plus sécurisé que César grâce à la clé variable</li>
+                <li>La sécurité dépend de la longueur et complexité de la clé</li>
+                <li>Inventé par Blaise de Vigenère au 16ème siècle</li>
+            </ol>
+        </div>
+
+        <div class="code-block">
+            <code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+#define MAX_LEN 200
+
+// Convertir texte et clé en majuscules
+void prepareText(char* text) {
+    for (int i = 0; text[i]; i++) {
+        text[i] = toupper(text[i]);
+    }
+}
+
+// Générer clé répétée de même longueur
+void generateKey(const char* text, const char* key, char* fullKey) {
+    int lenText = strlen(text);
+    int lenKey = strlen(key);
+    int j = 0;
+
+    for (int i = 0; i < lenText; i++) {
+        if (isalpha(text[i])) {
+            fullKey[i] = toupper(key[j % lenKey]);
+            j++;
+        } else {
+            fullKey[i] = text[i];
+        }
+    }
+    fullKey[lenText] = '\0';
+}
+
+// Chiffrement Vigenère
+void vigenereEncrypt(const char* text, const char* key, char* result) {
+    char fullKey[MAX_LEN];
+    generateKey(text, key, fullKey);
+
+    for (int i = 0; text[i]; i++) {
+        if (isalpha(text[i])) {
+            result[i] = ((text[i] - 'A') + (fullKey[i] - 'A')) % 26 + 'A';
+        } else {
+            result[i] = text[i];
+        }
+    }
+    result[strlen(text)] = '\0';
+}
+
+// Déchiffrement Vigenère
+void vigenereDecrypt(const char* text, const char* key, char* result) {
+    char fullKey[MAX_LEN];
+    generateKey(text, key, fullKey);
+
+    for (int i = 0; text[i]; i++) {
+        if (isalpha(text[i])) {
+            result[i] = ((text[i] - fullKey[i] + 26) % 26) + 'A';
+        } else {
+            result[i] = text[i];
+        }
+    }
+    result[strlen(text)] = '\0';
+}
+
+int main() {
+    char text[MAX_LEN];
+    char key[MAX_LEN];
+    char result[MAX_LEN];
+    int choix;
+
+    printf("Entrer le texte : ");
+    fgets(text, sizeof(text), stdin);
+    text[strcspn(text, "\n")] = '\0';
+
+    printf("Entrer la clé : ");
+    scanf("%s", key);
+
+    printf("Choisir l'opération :\n");
+    printf("1 - Chiffrer\n");
+    printf("2 - Déchiffrer\n");
+    printf("Votre choix : ");
+    scanf("%d", &choix);
+
+    prepareText(text);
+    prepareText(key);
+
+    if (choix == 1) {
+        vigenereEncrypt(text, key, result);
+        printf("Texte chiffré : %s\n", result);
+    } else if (choix == 2) {
+        vigenereDecrypt(text, key, result);
+        printf("Texte déchiffré : %s\n", result);
+    } else {
+        printf("Choix invalide.\n");
+    }
+
+    return 0;
+}</code>
+        </div>
+    </div>
+
+
+
+    <script>
+        function processVigenere() {
+            const message = document.getElementById('message').value.toUpperCase();
+            const key = document.getElementById('key').value.toUpperCase();
+            const operation = document.getElementById('operation').value;
+            const resultElement = document.getElementById('result');
+
+            if (!message || !key) {
+                resultElement.textContent = "Veuillez entrer un message et une clé";
+                return;
+            }
+
+            let result;
+            if (operation === 'encrypt') {
+                result = vigenereEncrypt(message, key);
+                resultElement.innerHTML = `<strong>Texte chiffré :</strong> ${result}`;
+            } else {
+                result = vigenereDecrypt(message, key);
+                resultElement.innerHTML = `<strong>Texte déchiffré :</strong> ${result}`;
+            }
+        }
+
+        function generateKey(message, key) {
+            let fullKey = '';
+            let keyIndex = 0;
+
+            for (let i = 0; i < message.length; i++) {
+                if (/^[A-Z]$/.test(message[i])) {
+                    fullKey += key[keyIndex % key.length];
+                    keyIndex++;
+                } else {
+                    fullKey += message[i];
+                }
+            }
+
+            return fullKey;
+        }
+
+        function vigenereEncrypt(message, key) {
+            const fullKey = generateKey(message, key);
+            let result = '';
+
+            for (let i = 0; i < message.length; i++) {
+                if (/^[A-Z]$/.test(message[i])) {
+                    const messageCharCode = message.charCodeAt(i) - 65;
+                    const keyCharCode = fullKey.charCodeAt(i) - 65;
+                    const encryptedCharCode = (messageCharCode + keyCharCode) % 26 + 65;
+                    result += String.fromCharCode(encryptedCharCode);
+                } else {
+                    result += message[i];
+                }
+            }
+
+            return result;
+        }
+
+        function vigenereDecrypt(message, key) {
+            const fullKey = generateKey(message, key);
+            let result = '';
+
+            for (let i = 0; i < message.length; i++) {
+                if (/^[A-Z]$/.test(message[i])) {
+                    const messageCharCode = message.charCodeAt(i) - 65;
+                    const keyCharCode = fullKey.charCodeAt(i) - 65;
+                    const decryptedCharCode = (messageCharCode - keyCharCode + 26) % 26 + 65;
+                    result += String.fromCharCode(decryptedCharCode);
+                } else {
+                    result += message[i];
+                }
+            }
+
+            return result;
+        }
+    </script>
+
+    <style>
+        .formulas {
+            display: flex;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .formula {
+            flex: 1;
+            background: rgba(106, 17, 203, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .formula h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .formula p {
+            font-family: 'Fira Code', monospace;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+    </style>
+    <footer>
+        <p>Projet réalisé dans le cadre du module de cryptographie (option) encadré par Dr. Bourmel</p>
+        <p>&copy; 2025 Chemaa Sarra - Tous droits réservés</p>
+        <div class="social-links">
+            <a href="https://github.com/sarrachemaa" target="_blank" aria-label="GitHub"><i
+                    class="fab fa-github"></i></a>
+            <a href="https://dz.linkedin.com/in/sarra-chemaa-0757502a3" target="_blank" aria-label="LinkedIn"><i
+                    class="fab fa-linkedin-in"></i></a>
+            <a href="sarrachemaa@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+    </footer>
+</body>
+
+</html>

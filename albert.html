@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alberti - Chiffrement par disque</title>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --accent: #ff3e9d;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .method-container {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-encrypt {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+        }
+
+        .btn-decrypt {
+            background: linear-gradient(to right, #ff512f, #dd2476);
+        }
+
+        .result {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .transformation-steps {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f0f0f0;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .step {
+            display: flex;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .step-position {
+            font-weight: bold;
+            margin-right: 1rem;
+            color: var(--primary);
+        }
+
+        .code-block {
+            background: #1e1e2d;
+            color: #e0e0e0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            overflow-x: auto;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            color: #aaa;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .explanation {
+            background: rgba(255, 62, 157, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--accent);
+        }
+
+        .example {
+            background: rgba(37, 117, 252, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .disk-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .disk {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .disk-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .disk-letters {
+            font-family: monospace;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .disk-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .disk-rotation {
+            width: 100px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .disk-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        nav {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        nav ul li a {
+            color: var(--dark-color);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            background: rgba(106, 17, 203, 0.05);
+            border-radius: 30px;
+            display: block;
+            text-align: center;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(106, 17, 203, 0.1);
+        }
+
+        nav ul li a:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
+        }
+
+
+
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .bigram-visual {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .grid-container {
+                max-width: 300px;
+            }
+        }
+
+        footer {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 3rem;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .social-links a:hover {
+            transform: translateY(-3px) scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animation subtile au survol */
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .social-links a:hover i {
+            animation: float 1.5s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            footer {
+                padding: 1.5rem 0.5rem;
+            }
+
+            .social-links {
+                gap: 1rem;
+            }
+
+            .social-links a {
+                font-size: 1.2rem;
+                width: 35px;
+                height: 35px;
+                line-height: 35px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Chiffrement d'Alberti</h1>
+        <div class="creator">Réalisé par Chemaa Sarra master 1 RSD Groupe 1</div>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="cesar.html"><i class="fas fa-rotate-right"></i> Chiffrement de César</a></li>
+            <li><a href="Vigenère.html"><i class="fas fa-keyboard"></i> Chiffrement de Vigenère</a></li>
+            <li><a href="polybe.html"><i class="fas fa-border-all"></i> Carré de Polybe</a></li>
+            <li><a href="substitution.html"><i class="fas fa-retweet"></i> Substitution simple</a></li>
+            <li><a href="trithemius.html"><i class="fas fa-sliders"></i> Trithemius</a></li>
+            <li><a href="doubletransposition.html"><i class="fas fa-layer-group"></i> Double transposition</a></li>
+            <li><a href="playfair.html"><i class="fas fa-table-cells"></i> Playfair</a></li>
+            <li><a href="atbash1.html"><i class="fas fa-arrows-left-right"></i> Atbash 1</a></li>
+            <li><a href="porta.html"><i class="fas fa-door-closed"></i> Porta</a></li>
+            <li><a href="atbash2.html"><i class="fas fa-arrows-turn-right"></i> Atbash 2</a></li>
+            <li><a href="autokey.html"><i class="fas fa-robot"></i> Autokey</a></li>
+            <li><a href="albert.html"><i class="fas fa-compact-disc"></i> d'Alberti</a></li>
+            <li><a href="rot13.html"><i class="fas fa-rotate"></i> ROT13</a></li>
+            <li><a href="Vernam.html"><i class="fas fa-user-secret"></i> Vernam OTP</a></li>
+            <li><a href="Beaufort.html"><i class="fas fa-wind"></i> Beaufort</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="method-container">
+            <div class="input-group">
+                <label for="message"><i class="fas fa-font"></i> Message :</label>
+                <textarea id="message" placeholder="Entrez votre texte ici..."></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="shift"><i class="fas fa-sliders-h"></i> Décalage du disque interne (0-25) :</label>
+                <input type="number" id="shift" min="0" max="25" value="3" oninput="updateShiftSlider(this.value)">
+                <div class="disk-rotation">
+                    <input type="range" id="shiftSlider" min="0" max="25" value="3" oninput="updateShift(this.value)">
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-encrypt" onclick="processAlberti('encrypt')">
+                    <i class="fas fa-lock"></i> Chiffrer
+                </button>
+                <button class="btn btn-decrypt" onclick="processAlberti('decrypt')">
+                    <i class="fas fa-lock-open"></i> Déchiffrer
+                </button>
+            </div>
+
+            <div class="disk-container">
+                <div class="disk">
+                    <div class="disk-title">Disque externe (fixe)</div>
+                    <div class="disk-letters" id="outerDisk">A B C D E F G H I J K L M N O P Q R S T U V W X Y Z</div>
+                </div>
+                <div class="disk">
+                    <div class="disk-title">Disque interne (mobile)</div>
+                    <div class="disk-letters" id="innerDisk">d e f g h i j k l m n o p q r s t u v w x y z a b c</div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-result"></i> Résultat :</label>
+                <div class="result" id="result"></div>
+                <div class="transformation-steps" id="steps"></div>
+            </div>
+
+            <div class="explanation">
+                <h3><i class="fas fa-info-circle"></i> Comment fonctionne le chiffrement d'Alberti ?</h3>
+                <p>Le chiffrement d'Alberti utilise un système de deux disques concentriques :</p>
+
+                <h4>Contexte historique :</h4>
+                <p>Inventée par Leon Battista Alberti en 1467, c'est l'un des premiers chiffrements polyalphabétiques de
+                    l'histoire.
+                    Il utilisait un disque chiffrant : deux cercles concentriques avec les lettres de l'alphabet.</p>
+
+                <h4>Principe de fonctionnement :</h4>
+                <ol>
+                    <li><strong>Deux alphabets (disques) :</strong>
+                        <ul>
+                            <li>Disque externe : fixe, avec l'alphabet normal (A à Z en majuscules)</li>
+                            <li>Disque interne : mobile, avec l'alphabet (souvent en minuscules), décalé selon une clé
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Chiffrement :</strong>
+                        <ul>
+                            <li>Pour chiffrer une lettre du texte clair : chercher la lettre dans le disque externe</li>
+                            <li>Prendre la lettre correspondante sur le disque interne (selon l'alignement actuel)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Déchiffrement :</strong>
+                        <ul>
+                            <li>Inverse du chiffrement : chercher la lettre chiffrée sur le disque interne</li>
+                            <li>Prendre la lettre correspondante sur le disque externe</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div class="example">
+                    <h4><i class="fas fa-lightbulb"></i> Exemple pratique :</h4>
+                    <p><strong>Alignement :</strong> A → d (décalage de 3)</p>
+                    <p><strong>Message :</strong> "HELLO"</p>
+                    <ol>
+                        <li>H (disque externe) → k (disque interne)</li>
+                        <li>E → h</li>
+                        <li>L → o</li>
+                        <li>L → o</li>
+                        <li>O → r</li>
+                    </ol>
+                    <p><strong>Résultat :</strong> "k h o o r"</p>
+                </div>
+
+                <h4>Particularité de la méthode Alberti :</h4>
+                <ul>
+                    <li>On peut changer le décalage du disque pendant le message (changer l'alignement)</li>
+                    <li>On peut utiliser des chiffres comme indicateurs pour signaler un changement</li>
+                    <li>Cela donne un chiffrement très difficile à casser pour l'époque</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="code-block">
+            <div class="code-header">
+                <span>Implémentation en C</span>
+                <button class="copy-btn" onclick="copyCode()">
+                    <i class="far fa-copy"></i> Copier
+                </button>
+            </div>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+#define TAILLE 26
+
+// Initialiser les deux alphabets
+void creerDisques(char disqueExterne[], char disqueInterne[], int decalage) {
+    for (int i = 0; i < TAILLE; i++) {
+        disqueExterne[i] = 'A' + i;
+        disqueInterne[i] = 'a' + (i + decalage) % TAILLE;
+    }
+    disqueExterne[TAILLE] = '\0';
+    disqueInterne[TAILLE] = '\0';
+}
+
+// Cherche une lettre dans un alphabet et retourne son index
+int trouverIndex(char c, char disque[]) {
+    for (int i = 0; i < TAILLE; i++) {
+        if (disque[i] == c) return i;
+    }
+    return -1;
+}
+
+// Chiffrement
+void chiffrer(char message[], char disqueExterne[], char disqueInterne[], char resultat[]) {
+    for (int i = 0; message[i]; i++) {
+        char c = toupper(message[i]);
+        int index = trouverIndex(c, disqueExterne);
+        if (index != -1) {
+            resultat[i] = disqueInterne[index];
+        } else {
+            resultat[i] = message[i]; // caractères non alphabétiques inchangés
+        }
+    }
+    resultat[strlen(message)] = '\0';
+}
+
+// Déchiffrement
+void dechiffrer(char chiffre[], char disqueExterne[], char disqueInterne[], char resultat[]) {
+    for (int i = 0; chiffre[i]; i++) {
+        char c = tolower(chiffre[i]);
+        int index = trouverIndex(c, disqueInterne);
+        if (index != -1) {
+            resultat[i] = disqueExterne[index];
+        } else {
+            resultat[i] = chiffre[i]; // caractères non alphabétiques inchangés
+        }
+    }
+    resultat[strlen(chiffre)] = '\0';
+}
+
+int main() {
+    char disqueExterne[TAILLE + 1], disqueInterne[TAILLE + 1];
+    char message[100], resultat[100];
+    int decalage, choix;
+
+    printf("Méthode de chiffrement d'Alberti\n");
+    printf("Entrez le message (en lettres seulement) : ");
+    scanf("%s", message);
+
+    printf("Entrez le décalage (entre 0 et 25) pour le disque interne : ");
+    scanf("%d", &decalage);
+
+    // Créer les disques selon le décalage
+    creerDisques(disqueExterne, disqueInterne, decalage);
+
+    printf("Choisissez une opération :\n1 - Chiffrer\n2 - Déchiffrer\nVotre choix : ");
+    scanf("%d", &choix);
+
+    if (choix == 1) {
+        chiffrer(message, disqueExterne, disqueInterne, resultat);
+        printf("Texte chiffré : %s\n", resultat);
+    } else if (choix == 2) {
+        dechiffrer(message, disqueExterne, disqueInterne, resultat);
+        printf("Texte déchiffré : %s\n", resultat);
+    } else {
+        printf("Choix invalide.\n");
+    }
+
+    // Affichage des disques
+    printf("\nDisque externe : %s\n", disqueExterne);
+    printf("Disque interne : %s\n", disqueInterne);
+
+    return 0;
+}</code></pre>
+        </div>
+    </div>
+
+    <script>
+        // Mettre à jour le slider quand le nombre change
+        function updateShiftSlider(value) {
+            document.getElementById('shiftSlider').value = value;
+            updateDisks(value);
+        }
+
+        // Mettre à jour le nombre quand le slider change
+        function updateShift(value) {
+            document.getElementById('shift').value = value;
+            updateDisks(value);
+        }
+
+        // Mettre à jour l'affichage des disques
+        function updateDisks(shift) {
+            const outerLetters = 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split(' ');
+            let innerLetters = [];
+
+            for (let i = 0; i < 26; i++) {
+                const letter = String.fromCharCode(97 + (i + parseInt(shift)) % 26);
+                innerLetters.push(letter);
+            }
+
+            document.getElementById('innerDisk').textContent = innerLetters.join(' ');
+        }
+
+        // Chiffrement/Déchiffrement Alberti - VERSION CORRIGÉE
+        function processAlberti(operation) {
+            const message = document.getElementById('message').value;
+            const shift = parseInt(document.getElementById('shift').value);
+            const resultElement = document.getElementById('result');
+            const stepsElement = document.getElementById('steps');
+
+            if (!message.trim()) {
+                resultElement.textContent = "Veuillez entrer un message";
+                return;
+            }
+
+            let result = "";
+            let stepsHtml = "";
+
+            // Créer les disques virtuels
+            const outerDisk = [];
+            const innerDisk = [];
+
+            for (let i = 0; i < 26; i++) {
+                outerDisk.push(String.fromCharCode(65 + i)); // A-Z
+                innerDisk.push(String.fromCharCode(97 + (i + shift) % 26)); // a-z avec décalage
+            }
+
+            for (let i = 0; i < message.length; i++) {
+                const char = message[i];
+                let transformed = char;
+
+                if (/[A-Za-z]/.test(char)) {
+                    const upperChar = char.toUpperCase();
+                    const lowerChar = char.toLowerCase();
+
+                    if (operation === 'encrypt') {
+                        // Chiffrement: disque externe -> disque interne
+                        const index = outerDisk.indexOf(upperChar);
+                        if (index !== -1) {
+                            transformed = innerDisk[index];
+                            if (char === char.toLowerCase()) {
+                                transformed = transformed.toLowerCase();
+                            } else {
+                                transformed = transformed.toUpperCase();
+                            }
+                        }
+                    } else {
+                        // Déchiffrement: disque interne -> disque externe
+                        const index = innerDisk.indexOf(lowerChar);
+                        if (index !== -1) {
+                            transformed = outerDisk[index];
+                            if (char === char.toLowerCase()) {
+                                transformed = transformed.toLowerCase();
+                            } else {
+                                transformed = transformed.toUpperCase();
+                            }
+                        }
+                    }
+                }
+
+                result += transformed;
+
+                // Ajouter le détail de la transformation
+                stepsHtml += `
+                    <div class="step">
+                        <div class="step-position">Lettre ${i + 1}:</div>
+                        <div>
+                            '${char}' → '${transformed}' 
+                            (${operation === 'encrypt' ? 'disque externe → interne' : 'disque interne → externe'})
+                        </div>
+                    </div>
+                `;
+            }
+
+            const operationText = operation === 'encrypt' ? 'chiffré' : 'déchiffré';
+            resultElement.innerHTML = `<strong>Texte ${operationText} :</strong> ${result}`;
+            stepsElement.innerHTML = `<h4>Détail des transformations :</h4>${stepsHtml}`;
+        }
+
+        // Copier le code C
+        function copyCode() {
+            const code = document.querySelector('.code-block code').innerText;
+            navigator.clipboard.writeText(code)
+                .then(() => {
+                    const btn = document.querySelector('.copy-btn');
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="far fa-copy"></i> Copier';
+                    }, 2000);
+                });
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDisks(3);
+        });
+    </script>
+
+    <footer>
+        <p>Projet réalisé dans le cadre du module de cryptographie (option) encadré par Dr. Bourmel</p>
+        <p>&copy; 2025 Chemaa Sarra - Tous droits réservés</p>
+        <div class="social-links">
+            <a href="https://github.com/sarrachemaa" target="_blank" aria-label="GitHub"><i
+                    class="fab fa-github"></i></a>
+            <a href="https://dz.linkedin.com/in/sarra-chemaa-0757502a3" target="_blank" aria-label="LinkedIn"><i
+                    class="fab fa-linkedin-in"></i></a>
+            <a href="sarrachemaa@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+    </footer>
+</body>
+
+</html>

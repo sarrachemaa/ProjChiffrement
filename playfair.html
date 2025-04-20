@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playfair - Projet Cryptographie</title>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --accent: #ff3e9d;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .method-container {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-encrypt {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+        }
+
+        .btn-decrypt {
+            background: linear-gradient(to right, #ff512f, #dd2476);
+        }
+
+        .result {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.3rem;
+            margin: 1.5rem 0;
+            max-width: 400px;
+        }
+
+        .grid-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1rem;
+            padding: 0.2rem;
+        }
+
+        .grid-cell.key-letter {
+            background: var(--primary);
+            color: white;
+        }
+
+        .grid-cell.merged-letter {
+            background: var(--accent);
+            color: white;
+        }
+
+        .process-steps {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f0f0f0;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .step {
+            display: flex;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 5px;
+            flex-wrap: wrap;
+        }
+
+        .step-type {
+            font-weight: bold;
+            margin-right: 1rem;
+            color: var(--primary);
+            width: 100px;
+        }
+
+        .code-block {
+            background: #1e1e2d;
+            color: #e0e0e0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            overflow-x: auto;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            color: #aaa;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .explanation {
+            background: rgba(255, 62, 157, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--accent);
+        }
+
+        .example {
+            background: rgba(37, 117, 252, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .bigram-visual {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+
+        .bigram-letter {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e2e8f0;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            position: relative;
+        }
+
+        .bigram-arrow {
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+
+        .position-marker {
+            position: absolute;
+            top: -15px;
+            font-size: 0.7rem;
+            color: var(--primary);
+        }
+
+
+
+        nav {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        nav ul li a {
+            color: var(--dark-color);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            background: rgba(106, 17, 203, 0.05);
+            border-radius: 30px;
+            display: block;
+            text-align: center;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(106, 17, 203, 0.1);
+        }
+
+        nav ul li a:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
+        }
+
+
+
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .bigram-visual {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .grid-container {
+                max-width: 300px;
+            }
+        }
+
+        footer {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 3rem;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .social-links a:hover {
+            transform: translateY(-3px) scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animation subtile au survol */
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .social-links a:hover i {
+            animation: float 1.5s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            footer {
+                padding: 1.5rem 0.5rem;
+            }
+
+            .social-links {
+                gap: 1rem;
+            }
+
+            .social-links a {
+                font-size: 1.2rem;
+                width: 35px;
+                height: 35px;
+                line-height: 35px;
+            }
+        }
+
+        footer {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 3rem;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .social-links a:hover {
+            transform: translateY(-3px) scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animation subtile au survol */
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .social-links a:hover i {
+            animation: float 1.5s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            footer {
+                padding: 1.5rem 0.5rem;
+            }
+
+            .social-links {
+                gap: 1rem;
+            }
+
+            .social-links a {
+                font-size: 1.2rem;
+                width: 35px;
+                height: 35px;
+                line-height: 35px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Chiffrement Playfair</h1>
+
+        <div class="creator">Réalisé par Chemaa Sarra master 1 RSD Groupe 1</div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="cesar.html"><i class="fas fa-rotate-right"></i> Chiffrement de César</a></li>
+            <li><a href="Vigenère.html"><i class="fas fa-keyboard"></i> Chiffrement de Vigenère</a></li>
+            <li><a href="polybe.html"><i class="fas fa-border-all"></i> Carré de Polybe</a></li>
+            <li><a href="substitution.html"><i class="fas fa-retweet"></i> Substitution simple</a></li>
+            <li><a href="trithemius.html"><i class="fas fa-sliders"></i> Trithemius</a></li>
+            <li><a href="doubletransposition.html"><i class="fas fa-layer-group"></i> Double transposition</a></li>
+            <li><a href="playfair.html"><i class="fas fa-table-cells"></i> Playfair</a></li>
+            <li><a href="atbash1.html"><i class="fas fa-arrows-left-right"></i> Atbash 1</a></li>
+            <li><a href="porta.html"><i class="fas fa-door-closed"></i> Porta</a></li>
+            <li><a href="atbash2.html"><i class="fas fa-arrows-turn-right"></i> Atbash 2</a></li>
+            <li><a href="autokey.html"><i class="fas fa-robot"></i> Autokey</a></li>
+            <li><a href="albert.html"><i class="fas fa-compact-disc"></i> d'Alberti</a></li>
+            <li><a href="rot13.html"><i class="fas fa-rotate"></i> ROT13</a></li>
+            <li><a href="Vernam.html"><i class="fas fa-user-secret"></i> Vernam OTP</a></li>
+            <li><a href="Beaufort.html"><i class="fas fa-wind"></i> Beaufort</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="method-container">
+            <div class="input-group">
+                <label for="key"><i class="fas fa-key"></i> Clé :</label>
+                <input type="text" id="key" placeholder="Entrez votre clé...">
+            </div>
+
+            <div class="input-group">
+                <label for="message"><i class="fas fa-font"></i> Message (lettres seulement) :</label>
+                <textarea id="message" placeholder="Entrez votre texte ici (sans espaces)..."></textarea>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-encrypt" onclick="processPlayfair('encrypt')">
+                    <i class="fas fa-lock"></i> Chiffrer
+                </button>
+                <button class="btn btn-decrypt" onclick="processPlayfair('decrypt')">
+                    <i class="fas fa-lock-open"></i> Déchiffrer
+                </button>
+            </div>
+
+            <div id="grid-display" style="display: none;">
+                <h3><i class="fas fa-table"></i> Grille Playfair</h3>
+                <div class="grid-container" id="playfair-grid"></div>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-result"></i> Résultat :</label>
+                <div class="result" id="result"></div>
+                <div class="process-steps" id="steps"></div>
+            </div>
+
+            <div class="explanation">
+                <h3><i class="fas fa-info-circle"></i> Comment fonctionne le chiffrement Playfair ?</h3>
+                <p>Le chiffrement Playfair utilise une grille 5x5 contenant :</p>
+                <ul>
+                    <li>La clé (sans doublons)</li>
+                    <li>Le reste de l'alphabet (I et J partagent la même case)</li>
+                    <li>Le message est divisé en paires de lettres (bigrammes)</li>
+                </ul>
+
+                <div class="example">
+                    <h4><i class="fas fa-lightbulb"></i> Règles de chiffrement :</h4>
+
+                    <div style="margin-bottom: 1rem;">
+                        <h5>1. Même ligne</h5>
+                        <p>Prendre la lettre à droite (si dernière colonne, revenir au début)</p>
+                        <div class="bigram-visual">
+                            <div class="bigram-letter">A<span class="position-marker">L1,C1</span></div>
+                            <div class="bigram-arrow">→</div>
+                            <div class="bigram-letter">B<span class="position-marker">L1,C2</span></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <h5>2. Même colonne</h5>
+                        <p>Prendre la lettre en dessous (si dernière ligne, revenir en haut)</p>
+                        <div class="bigram-visual">
+                            <div class="bigram-letter">A<span class="position-marker">L1,C1</span></div>
+                            <div class="bigram-arrow">↓</div>
+                            <div class="bigram-letter">F<span class="position-marker">L2,C1</span></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h5>3. Rectangle</h5>
+                        <p>Prendre la lettre dans la même ligne mais colonne opposée</p>
+                        <div class="bigram-visual">
+                            <div class="bigram-letter">A<span class="position-marker">L1,C1</span></div>
+                            <div class="bigram-letter">F<span class="position-marker">L2,C2</span></div>
+                            <div class="bigram-arrow">→</div>
+                            <div class="bigram-letter">B<span class="position-marker">L1,C2</span></div>
+                            <div class="bigram-letter">E<span class="position-marker">L2,C1</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="code-block">
+            <div class="code-header">
+                <span>Implémentation en C</span>
+                <button class="copy-btn" onclick="copyCode()">
+                    <i class="far fa-copy"></i> Copier
+                </button>
+            </div>
+            <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+#define SIZE 5
+
+char grille[SIZE][SIZE];
+
+void creer_grille(char cle[]) {
+    char alphabet[] = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
+    int k = 0;
+    char used[26] = {0};
+
+    for (int i = 0; i < strlen(cle); i++) {
+        char c = toupper(cle[i]);
+        if (c == 'J') c = 'I';
+        if (!used[c - 'A']) {
+            used[c - 'A'] = 1;
+            grille[k / SIZE][k % SIZE] = c;
+            k++;
+        }
+    }
+
+    for (int i = 0; i < 25; i++) {
+        if (!used[alphabet[i] - 'A']) {
+            grille[k / SIZE][k % SIZE] = alphabet[i];
+            k++;
+        }
+    }
+}
+
+void playfair(char bigrammes[][2], int n, char resultat[], int mode) {
+    for (int i = 0; i < n; i++) {
+        int l1, c1, l2, c2;
+        trouver_pos(bigrammes[i][0], &l1, &c1);
+        trouver_pos(bigrammes[i][1], &l2, &c2);
+
+        if (l1 == l2) { // Même ligne
+            resultat[i*2] = grille[l1][(c1 + mode + SIZE) % SIZE];
+            resultat[i*2+1] = grille[l2][(c2 + mode + SIZE) % SIZE];
+        }
+        else if (c1 == c2) { // Même colonne
+            resultat[i*2] = grille[(l1 + mode + SIZE) % SIZE][c1];
+            resultat[i*2+1] = grille[(l2 + mode + SIZE) % SIZE][c2];
+        }
+        else { // Rectangle
+            resultat[i*2] = grille[l1][c2];
+            resultat[i*2+1] = grille[l2][c1];
+        }
+    }
+    resultat[n*2] = '\0';
+}</code></pre>
+        </div>
+    </div>
+
+    <script>
+        const SIZE = 5;
+        let grid = Array(SIZE).fill().map(() => Array(SIZE).fill(''));
+
+        // Créer la grille Playfair
+        function createGrid(key) {
+            let cleanedKey = key.toUpperCase().replace(/[^A-Z]/g, '').replace(/J/g, 'I');
+            let uniqueKey = [...new Set(cleanedKey.split(''))].join('');
+            let alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
+            let usedLetters = new Set();
+
+            // Remplir avec la clé
+            let k = 0;
+            for (let i = 0; i < uniqueKey.length; i++) {
+                grid[Math.floor(k / SIZE)][k % SIZE] = uniqueKey[i];
+                usedLetters.add(uniqueKey[i]);
+                k++;
+            }
+
+            // Remplir avec le reste de l'alphabet
+            for (let i = 0; i < alphabet.length; i++) {
+                if (!usedLetters.has(alphabet[i])) {
+                    grid[Math.floor(k / SIZE)][k % SIZE] = alphabet[i];
+                    k++;
+                }
+            }
+
+            // Afficher la grille
+            const gridContainer = document.getElementById('playfair-grid');
+            gridContainer.innerHTML = '';
+
+            for (let i = 0; i < SIZE; i++) {
+                for (let j = 0; j < SIZE; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    if (i * SIZE + j < uniqueKey.length) {
+                        cell.classList.add('key-letter');
+                    }
+                    if (grid[i][j] === 'I') {
+                        cell.textContent = 'I/J';
+                        cell.classList.add('merged-letter');
+                    } else {
+                        cell.textContent = grid[i][j];
+                    }
+                    gridContainer.appendChild(cell);
+                }
+            }
+
+            document.getElementById('grid-display').style.display = 'block';
+        }
+
+        // Trouver la position d'une lettre dans la grille
+        function findPosition(c) {
+            c = c === 'J' ? 'I' : c;
+            for (let i = 0; i < SIZE; i++) {
+                for (let j = 0; j < SIZE; j++) {
+                    if (grid[i][j] === c) {
+                        return { row: i, col: j };
+                    }
+                }
+            }
+            return { row: -1, col: -1 };
+        }
+
+        // Préparer les bigrammes
+        function prepareBigrams(message) {
+            let cleaned = message.toUpperCase().replace(/[^A-Z]/g, '').replace(/J/g, 'I');
+            let bigrams = [];
+
+            for (let i = 0; i < cleaned.length; i += 2) {
+                let a = cleaned[i];
+                let b = (i + 1 < cleaned.length) ? cleaned[i + 1] : 'X';
+
+                if (a === b) {
+                    b = 'X';
+                    i--; // Pour traiter la lettre suivante au prochain tour
+                }
+
+                bigrams.push([a, b]);
+            }
+
+            return bigrams;
+        }
+
+        // Traitement Playfair
+        function processPlayfair(operation) {
+            const key = document.getElementById('key').value;
+            const message = document.getElementById('message').value;
+            const resultElement = document.getElementById('result');
+            const stepsElement = document.getElementById('steps');
+
+            if (!key.trim()) {
+                resultElement.textContent = "Veuillez entrer une clé";
+                return;
+            }
+
+            if (!message.trim()) {
+                resultElement.textContent = "Veuillez entrer un message";
+                return;
+            }
+
+            // Créer la grille
+            createGrid(key);
+
+            // Préparer les bigrammes
+            const bigrams = prepareBigrams(message);
+            let stepsHtml = "<h4>Détail des transformations :</h4>";
+            let result = "";
+            const mode = operation === 'encrypt' ? 1 : -1;
+
+            for (let i = 0; i < bigrams.length; i++) {
+                const [a, b] = bigrams[i];
+                const pos1 = findPosition(a);
+                const pos2 = findPosition(b);
+
+                let transformedA, transformedB;
+                let rule = "";
+
+                if (pos1.row === pos2.row) {
+                    // Même ligne
+                    rule = "Même ligne → décalage horizontal";
+                    transformedA = grid[pos1.row][(pos1.col + mode + SIZE) % SIZE];
+                    transformedB = grid[pos2.row][(pos2.col + mode + SIZE) % SIZE];
+                } else if (pos1.col === pos2.col) {
+                    // Même colonne
+                    rule = "Même colonne → décalage vertical";
+                    transformedA = grid[(pos1.row + mode + SIZE) % SIZE][pos1.col];
+                    transformedB = grid[(pos2.row + mode + SIZE) % SIZE][pos2.col];
+                } else {
+                    // Rectangle
+                    rule = "Rectangle → coins opposés";
+                    transformedA = grid[pos1.row][pos2.col];
+                    transformedB = grid[pos2.row][pos1.col];
+                }
+
+                result += transformedA + transformedB;
+
+                stepsHtml += `
+                <div class="step">
+                    <div class="step-type">Bigramme ${i + 1}:</div>
+                    <div style="flex:1;">
+                        <strong>${a}${b}</strong> → ${transformedA}${transformedB}<br>
+                        <small>${rule} (${a}: L${pos1.row + 1},C${pos1.col + 1} | ${b}: L${pos2.row + 1},C${pos2.col + 1})</small>
+                    </div>
+                </div>
+            `;
+            }
+
+            const operationText = operation === 'encrypt' ? 'chiffré' : 'déchiffré';
+            resultElement.innerHTML = `<strong>Texte ${operationText} :</strong> ${result}`;
+            stepsElement.innerHTML = stepsHtml;
+        }
+
+        // Copier le code C
+        function copyCode() {
+            const code = document.querySelector('.code-block code').innerText;
+            navigator.clipboard.writeText(code)
+                .then(() => {
+                    const btn = document.querySelector('.copy-btn');
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="far fa-copy"></i> Copier';
+                    }, 2000);
+                });
+        }
+    </script>
+    <footer>
+        <p>Projet réalisé dans le cadre du module de cryptographie (option) encadré par Dr. Bourmel</p>
+        <p>&copy; 2025 Chemaa Sarra - Tous droits réservés</p>
+        <div class="social-links">
+            <a href="https://github.com/sarrachemaa" target="_blank" aria-label="GitHub"><i
+                    class="fab fa-github"></i></a>
+            <a href="https://dz.linkedin.com/in/sarra-chemaa-0757502a3" target="_blank" aria-label="LinkedIn"><i
+                    class="fab fa-linkedin-in"></i></a>
+            <a href="sarrachemaa@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+    </footer>
+
+</body>
+
+</html>

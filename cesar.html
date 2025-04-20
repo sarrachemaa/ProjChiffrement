@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chiffrement de César</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<script>
+    // Version simplifiée intégrée directement dans la page
+    function processCesar() {
+        const message = document.getElementById('message').value.toUpperCase();
+        const shift = parseInt(document.getElementById('shift').value) || 3;
+        const operation = document.getElementById('operation').value;
+        const resultElement = document.getElementById('result');
+
+        if (!message) {
+            resultElement.textContent = "Veuillez entrer un message";
+            return;
+        }
+
+        let result = '';
+        for (let i = 0; i < message.length; i++) {
+            const code = message.charCodeAt(i);
+
+            if (code >= 65 && code <= 90) { // A-Z
+                const offset = operation === 'encrypt' ? shift : (26 - shift);
+                result += String.fromCharCode(((code - 65 + offset) % 26) + 65);
+            } else {
+                result += message[i]; // Conserve les autres caractères
+            }
+        }
+
+        resultElement.innerHTML = operation === 'encrypt'
+            ? `<strong>Texte chiffré :</strong> ${result}`
+            : `<strong>Texte déchiffré :</strong> ${result}`;
+    }
+
+    // Permet d'exécuter avec la touche Entrée
+    document.getElementById('message').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') processCesar();
+    });
+</script>
+
+<body>
+    <header>
+        <h1>Chiffrement de César</h1>
+        <div class="creator">Réalisé par Chemaa Sarra master 1 RSD Groupe 1</div>
+
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="cesar.html"><i class="fas fa-rotate-right"></i> Chiffrement de César</a></li>
+            <li><a href="Vigenère.html"><i class="fas fa-keyboard"></i> Chiffrement de Vigenère</a></li>
+            <li><a href="polybe.html"><i class="fas fa-border-all"></i> Carré de Polybe</a></li>
+            <li><a href="substitution.html"><i class="fas fa-retweet"></i> Substitution simple</a></li>
+            <li><a href="trithemius.html"><i class="fas fa-sliders"></i> Trithemius</a></li>
+            <li><a href="doubletransposition.html"><i class="fas fa-layer-group"></i> Double transposition</a></li>
+            <li><a href="playfair.html"><i class="fas fa-table-cells"></i> Playfair</a></li>
+            <li><a href="atbash1.html"><i class="fas fa-arrows-left-right"></i> Atbash 1</a></li>
+            <li><a href="porta.html"><i class="fas fa-door-closed"></i> Porta</a></li>
+            <li><a href="atbash2.html"><i class="fas fa-arrows-turn-right"></i> Atbash 2</a></li>
+            <li><a href="autokey.html"><i class="fas fa-robot"></i> Autokey</a></li>
+            <li><a href="albert.html"><i class="fas fa-compact-disc"></i> d'Alberti</a></li>
+            <li><a href="rot13.html"><i class="fas fa-rotate"></i> ROT13</a></li>
+            <li><a href="Vernam.html"><i class="fas fa-user-secret"></i> Vernam OTP</a></li>
+            <li><a href="Beaufort.html"><i class="fas fa-wind"></i> Beaufort</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="method-container">
+            <div class="input-group">
+                <label for="message">Message :</label>
+                <input type="text" id="message" placeholder="Entrez votre message">
+            </div>
+
+            <div class="input-group">
+                <label for="shift">Décalage :</label>
+                <input type="number" id="shift" placeholder="Ex: 3" value="3">
+            </div>
+
+            <div class="input-group">
+                <label for="operation">Opération :</label>
+                <select id="operation">
+                    <option value="encrypt">Chiffrer</option>
+                    <option value="decrypt">Déchiffrer</option>
+                </select>
+            </div>
+
+            <button onclick="processCesar()">Exécuter</button>
+
+            <div class="input-group">
+                <label>Résultat :</label>
+                <div class="result" id="result"></div>
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h3>Explication :</h3>
+            <p><strong>Principe :</strong> C'est une substitution monoalphabétique. Chaque lettre du texte est décalée
+                d'un certain nombre de positions dans l'alphabet.</p>
+            <p><strong>Exemple avec décalage de 3 :</strong> A → D, B → E, C → F, etc.</p>
+            <p><strong>Formule :</strong></p>
+            <ul>
+                <li>Chiffrement : C = (L + k) mod 26</li>
+                <li>Déchiffrement : L = (C - k + 26) mod 26</li>
+            </ul>
+            <p>(k est la clé/décalage, L une lettre en clair, C une lettre chiffrée)</p>
+        </div>
+
+        <div class="code-block">
+            <code>#include &lt;stdio.h&gt;
+          #include &lt;string.h&gt;
+          #include &lt;ctype.h&gt;
+          
+          #define MAX_LEN 100
+          
+          void cesarEncrypt(char* text, int shift, char* result) {
+              for (int i = 0; text[i]; i++) {
+                  if (isalpha(text[i])) {
+                      char base = isupper(text[i]) ? 'A' : 'a';
+                      result[i] = ((text[i] - base + shift) % 26) + base;
+                  } else {
+                      result[i] = text[i];
+                  }
+              }
+              result[strlen(text)] = '\0';
+          }
+          
+          /* Fonction de déchiffrement */
+          void cesarDecrypt(char* text, int shift, char* result) {
+              for (int i = 0; text[i]; i++) {
+                  if (isalpha(text[i])) {
+                      char base = isupper(text[i]) ? 'A' : 'a';
+                      result[i] = ((text[i] - base - shift + 26) % 26) + base;
+                  } else {
+                      result[i] = text[i];
+                  }
+              }
+              result[strlen(text)] = '\0';
+          }
+          
+          int main() {
+              char message[MAX_LEN];
+              char output[MAX_LEN];
+              int shift;
+              int choice;
+          
+              printf("Entrer un mot : ");
+              scanf("%s", message);
+              return 0;
+          }</code>
+        </div>
+
+    </div>
+
+
+    <footer>
+        <p>Projet réalisé dans le cadre du module de cryptographie (option) encadré par Dr. Bourmel</p>
+        <p>&copy; 2025 Chemaa Sarra - Tous droits réservés</p>
+        <div class="social-links">
+            <a href="https://github.com/sarrachemaa" target="_blank" aria-label="GitHub"><i
+                    class="fab fa-github"></i></a>
+            <a href="https://dz.linkedin.com/in/sarra-chemaa-0757502a3" target="_blank" aria-label="LinkedIn"><i
+                    class="fab fa-linkedin-in"></i></a>
+            <a href="sarrachemaa@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+    </footer>
+
+    <script src="methods/cesar.js"></script>
+
+</body>
+
+</html>
